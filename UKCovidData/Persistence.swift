@@ -14,8 +14,14 @@ struct PersistenceController {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
         for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
+            let newItem = AreaAgeDateCases(context: viewContext)
             newItem.timestamp = Date()
+            newItem.age = "10_14"
+            newItem.areaCode = "12345"
+            newItem.areaName = "A borough"
+            newItem.areaType = "ltla"
+            newItem.date = "2021-10-04"
+            newItem.cases = 43
         }
         do {
             try viewContext.save()
