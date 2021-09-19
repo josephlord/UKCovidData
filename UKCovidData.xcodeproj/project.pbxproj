@@ -17,7 +17,6 @@
 		BF6A8DF826F2541C0084DF96 /* UKCovidDataUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DF726F2541C0084DF96 /* UKCovidDataUITests.swift */; };
 		BF6A8DFA26F2541C0084DF96 /* UKCovidDataUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DF926F2541C0084DF96 /* UKCovidDataUITestsLaunchTests.swift */; };
 		BF6A8E0726F262100084DF96 /* DataUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8E0626F262100084DF96 /* DataUpdater.swift */; };
-		BF6A8E0A26F2626B0084DF96 /* LTLA_case_data_by_age.csv in Resources */ = {isa = PBXBuildFile; fileRef = BF6A8E0926F2626B0084DF96 /* LTLA_case_data_by_age.csv */; };
 		BF6A8E0C26F262740084DF96 /* ONS-population_2021-08-05.csv in Resources */ = {isa = PBXBuildFile; fileRef = BF6A8E0B26F262740084DF96 /* ONS-population_2021-08-05.csv */; };
 /* End PBXBuildFile section */
 
@@ -254,7 +253,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF6A8E0A26F2626B0084DF96 /* LTLA_case_data_by_age.csv in Resources */,
 				BF6A8DDF26F2541C0084DF96 /* Preview Assets.xcassets in Resources */,
 				BF6A8E0C26F262740084DF96 /* ONS-population_2021-08-05.csv in Resources */,
 				BF6A8DDC26F2541C0084DF96 /* Assets.xcassets in Resources */,

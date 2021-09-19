@@ -16,7 +16,8 @@ struct ContentView: View {
         predicate: NSPredicate(format: "areaName = %@ AND age IN %@", "Surrey Heath", ["15_19", "10_14"]),
         animation: .default)
     private var items: FetchedResults<AreaAgeDateCases>
-
+    @State private var isLoading: Bool = false
+    
     init() {
 
     }
@@ -42,7 +43,7 @@ struct ContentView: View {
                 ToolbarItem {
                     Button(action: update) {
                         Label("Update", systemImage: "square.and.arrow.down.on.square")
-                    }
+                    }.disabled(isLoading)
                 }
             }
             Text("Select an item")
@@ -50,12 +51,14 @@ struct ContentView: View {
     }
     
     private func update() {
+        isLoading = true
         Task {
             do {
                 try await updateCases()
             } catch {
                 print(error)
             }
+            isLoading = false
         }
     }
 

@@ -32,7 +32,18 @@ private func clearCaseData(context: NSManagedObjectContext) async throws {
     try await context.perform {
         let fr = AreaAgeDateCases.fetchRequest()
         fr.returnsObjectsAsFaults = true
-        try fr.execute().forEach { context.delete($0) }
+        fr.fetchLimit = 10_000
+        var hasMore = true
+        while hasMore {
+        print("About to delete")
+            let results = try fr.execute()
+            hasMore = !results.isEmpty
+            results.forEach { context.delete($0) }
+            print("Deletion done")
+            try context.save()
+            print("Saved after delete")
+        }
+        print("Finished deletion")
     }
 }
 
