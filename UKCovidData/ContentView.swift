@@ -18,17 +18,19 @@ struct ContentView: View {
 //    private var items: FetchedResults<AreaAgeDateCases>
     @StateObject
     var datesUseCase = DateUseCase(
-        areas: [Area(name: "Surrey Heath", id: "E07000214", populationsForAges: ["10_14" : 5000, "15_19": 5000])],
-        ages: [
-            "10_14",
-//            "15_19",
-        ],
-        context: {
-            let context = PersistenceController.shared.container.newBackgroundContext()
-            context.automaticallyMergesChangesFromParent = true
-            return context
-        }())
+//            areas: [Area(name: "Surrey Heath", id: "E07000214", populationsForAges: ["10_14" : 5000, "15_19": 5000])],
+//            ages: [
+//                "10_14",
+//    //            "15_19",
+//            ],
+            context: {
+                let context = PersistenceController.shared.container.newBackgroundContext()
+                context.automaticallyMergesChangesFromParent = true
+                return context
+            }())
     
+    @StateObject
+    var searchUseCase: SearchUseCase = SearchUseCase(container: PersistenceController.shared.container)
     
     @State private var isLoading: Bool = false
     
@@ -40,11 +42,13 @@ struct ContentView: View {
     
     @State private var viewModelWhileLoading: CovidDataGroupViewModel?
     
+    var currentAreaName: String { datesUseCase.viewModel.areas.first?.name ?? ""}
+    
     var viewModel: CovidDataGroupViewModel {
         viewModelWhileLoading ?? datesUseCase.viewModel
     }
     
-    @State var searchText: String = "Surrey Heath"
+    @State var searchText: String = ""
     
     var body: some View {
         NavigationView {
@@ -71,9 +75,13 @@ struct ContentView: View {
     //                .onDelete(perform: deleteItems)
     //            }
             }
-//            .searchable(text: $searchText) {
-//
-//            }
+            .searchable(text: $searchText) {
+                if searchText == "" || searchText == currentAreaName {
+                    EmptyView()
+                } else {
+                    
+                }
+            }
             .toolbar {
 //                ToolbarItem(placement: .navigationBarTrailing) {
 //                    EditButton()
@@ -84,7 +92,7 @@ struct ContentView: View {
                     }.disabled(isLoading)
                 }
             }
-            .navigationTitle(Text(datesUseCase.viewModel.areas.first?.name ?? ""))
+            .navigationTitle(Text(currentAreaName))
         }
     }
     

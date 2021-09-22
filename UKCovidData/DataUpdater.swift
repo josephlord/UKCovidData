@@ -137,6 +137,7 @@ private func updateCaseData(url: URL, context: NSManagedObjectContext) async thr
                 try context.execute(batchInsert)
             }
         }
+        try context.save()
     }
     print("Data import complete. Count: \(dataItemCount)")
 }

@@ -27,6 +27,18 @@ struct CovidDataGroupViewModel : Sendable{
     var areas: [Area]
     var ages: [String]
     var cases: [DateCaseValue]
+    
+    init(areas: [Area], ages: [String], cases: [DateCaseValue]) {
+        self.areas = areas
+        self.ages = ages
+        self.cases = cases
+    }
+    
+    init() {
+        areas = []
+        ages = []
+        cases = []
+    }
 }
 
 struct AreaAgeCasesEntity : Sendable {
@@ -46,13 +58,46 @@ class DateUseCase : ObservableObject {
     @Published var viewModel: CovidDataGroupViewModel
     private let fetchedResultsController: NSFetchedResultsController<AreaAgeDateCases>
     
-    init(areas: [Area], ages: [String], context: NSManagedObjectContext) {
-        viewModel = CovidDataGroupViewModel(areas: areas, ages: ages, cases: [])
-        let request = AreaAgeDateCases.fetchRequest()
-        request.predicate = NSPredicate(
+    var areas: [Area] = [] {
+        didSet {
+            updatePredicate()
+        }
+    }
+    
+    var ages: [String] = [] {
+        didSet {
+            updatePredicate()
+        }
+    }
+    
+    private lazy var frcSequence = FRCAsyncSequence(fRC: fetchedResultsController, mapper: AreaAgeCasesEntity.init)
+    
+    private func updatePredicate() {
+        guard !areas.isEmpty, !ages.isEmpty else {
+            viewModel = CovidDataGroupViewModel()
+            return
+        }
+        fetchedResultsController.fetchRequest.predicate = NSPredicate(
             format: "areaCode IN %@ AND age IN %@",
             areas.map { $0.id },
             ages)
+        Task {
+            do {
+                try await fetchedResultsController.managedObjectContext.perform {
+                    try self.fetchedResultsController.performFetch()
+                    self.frcSequence.controllerUpdated()
+                }
+            } catch {
+                assertionFailure(error.localizedDescription)
+                return
+            }
+        }
+    }
+    
+    init(context: NSManagedObjectContext) {
+        viewModel = CovidDataGroupViewModel()
+   
+        let request = AreaAgeDateCases.fetchRequest()
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: true),
             NSSortDescriptor(keyPath: \AreaAgeDateCases.areaCode, ascending: false),
@@ -63,17 +108,7 @@ class DateUseCase : ObservableObject {
             managedObjectContext: context,
             sectionNameKeyPath: nil,
             cacheName: nil)
-        let frcSequence = FRCAsyncSequence(fRC: fetchedResultsController, mapper: AreaAgeCasesEntity.init)
         Task {
-            do {
-                try await context.perform {
-                    try self.fetchedResultsController.performFetch()
-                    frcSequence.controllerUpdated()
-                }
-            } catch {
-                assertionFailure(error.localizedDescription)
-                return
-            }
             var model = CovidDataGroupViewModel(areas: areas, ages: ages, cases: [])
             let groupPopulation = areas.reduce(0) { sum, area in
                 sum + Int(ages.reduce(0) { $0 + area.populationsForAges[$1]! })
@@ -124,10 +159,66 @@ class DateUseCase : ObservableObject {
     
     @MainActor
     func updatePublished(newValue: CovidDataGroupViewModel) {
+        guard !areas.isEmpty, !ages.isEmpty else { return }
         viewModel = newValue
     }
 }
+
+
+class SearchUseCase : ObservableObject {
+    @Published var areas: [Area] = []
+    private let container: NSPersistentContainer
     
+    init(container: NSPersistentContainer) {
+        self.container = container
+    }
+    
+    @MainActor
+    func updateAreas(areas: [Area]) {
+        self.areas = areas
+    }
+    
+    var searchString: String {
+        didSet {
+            guard !searchString.isEmpty else {
+                areas = []
+                return
+            }
+            let context = container.newBackgroundContext()
+            let search = searchString
+            Task {
+                do {
+                    let areas = try await context.perform {
+                        let areasFR = AreaCodeName.fetchRequest()
+                        areasFR.fetchLimit = 8
+                        areasFR.sortDescriptors = [NSSortDescriptor(keyPath: \AreaCodeName.areaName, ascending: true)]
+                        areasFR.predicate = NSPredicate(format: "areaName CONTAINS[c] %@", search)
+                        let areasO = try context.fetch(areasFR)
+                        
+                        let populationsFR = AreaAgeDemographics.fetchRequest()
+                        populationsFR.predicate = NSPredicate(format: "areaCode IN %@", areasO.compactMap { $0.areaCode })
+                        let populations = try context.fetch(populationsFR)
+                        
+                        let areas = areasO.map { area in
+                            Area(
+                                name: area.areaName!,
+                                id: area.areaCode!,
+                                populationsForAges: Dictionary(uniqueKeysWithValues: populations
+                                    .filter { $0.areaCode == area.areaCode }
+                                    .map { ($0.age!, $0.population) })
+                                )
+                        }
+                        return areas
+//                        await self.updateAreas(areas: areas)
+                    }
+                    await updateAreas(areas: areas)
+                } catch {
+                    fatalError(error.localizedDescription)
+                }
+            }
+        }
+    }
+}
     
 class FRCAsyncSequence<FR, OUT> : NSObject, AsyncSequence, NSFetchedResultsControllerDelegate
 where FR : NSFetchRequestResult, OUT : Sendable {
