@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF47343626F7EC0700E0B866 /* DataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF47343526F7EC0700E0B866 /* DataUseCase.swift */; };
 		BF6A8DD826F2541A0084DF96 /* UKCovidDataApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */; };
 		BF6A8DDA26F2541A0084DF96 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DD926F2541A0084DF96 /* ContentView.swift */; };
 		BF6A8DDC26F2541C0084DF96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF6A8DDB26F2541C0084DF96 /* Assets.xcassets */; };
@@ -18,6 +19,7 @@
 		BF6A8DFA26F2541C0084DF96 /* UKCovidDataUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DF926F2541C0084DF96 /* UKCovidDataUITestsLaunchTests.swift */; };
 		BF6A8E0726F262100084DF96 /* DataUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8E0626F262100084DF96 /* DataUpdater.swift */; };
 		BF6A8E0C26F262740084DF96 /* ONS-population_2021-08-05.csv in Resources */ = {isa = PBXBuildFile; fileRef = BF6A8E0B26F262740084DF96 /* ONS-population_2021-08-05.csv */; };
+		BFEE758B26FB52610093F107 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = BFEE758A26FB52610093F107 /* DequeModule */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BF47343526F7EC0700E0B866 /* DataUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUseCase.swift; sourceTree = "<group>"; };
 		BF6A8DD426F2541A0084DF96 /* UKCovidData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UKCovidData.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UKCovidDataApp.swift; sourceTree = "<group>"; };
 		BF6A8DD926F2541A0084DF96 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -60,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFEE758B26FB52610093F107 /* DequeModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,6 +115,7 @@
 				BF6A8DE226F2541C0084DF96 /* UKCovidData.xcdatamodeld */,
 				BF6A8DDD26F2541C0084DF96 /* Preview Content */,
 				BF6A8E0626F262100084DF96 /* DataUpdater.swift */,
+				BF47343526F7EC0700E0B866 /* DataUseCase.swift */,
 			);
 			path = UKCovidData;
 			sourceTree = "<group>";
@@ -165,6 +170,9 @@
 			dependencies = (
 			);
 			name = UKCovidData;
+			packageProductDependencies = (
+				BFEE758A26FB52610093F107 /* DequeModule */,
+			);
 			productName = UKCovidData;
 			productReference = BF6A8DD426F2541A0084DF96 /* UKCovidData.app */;
 			productType = "com.apple.product-type.application";
@@ -237,6 +245,9 @@
 				Base,
 			);
 			mainGroup = BF6A8DCB26F2541A0084DF96;
+			packageReferences = (
+				BFEE758926FB52610093F107 /* XCRemoteSwiftPackageReference "swift-collections" */,
+			);
 			productRefGroup = BF6A8DD526F2541A0084DF96 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -283,6 +294,7 @@
 				BF6A8DE126F2541C0084DF96 /* Persistence.swift in Sources */,
 				BF6A8DDA26F2541A0084DF96 /* ContentView.swift in Sources */,
 				BF6A8DD826F2541A0084DF96 /* UKCovidDataApp.swift in Sources */,
+				BF47343626F7EC0700E0B866 /* DataUseCase.swift in Sources */,
 				BF6A8DE426F2541C0084DF96 /* UKCovidData.xcdatamodeld in Sources */,
 				BF6A8E0726F262100084DF96 /* DataUpdater.swift in Sources */,
 			);
@@ -633,6 +645,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BFEE758926FB52610093F107 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BFEE758A26FB52610093F107 /* DequeModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFEE758926FB52610093F107 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = DequeModule;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		BF6A8DE226F2541C0084DF96 /* UKCovidData.xcdatamodeld */ = {

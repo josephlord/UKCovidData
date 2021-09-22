@@ -11,12 +11,32 @@ import CoreData
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: false)],
-        predicate: NSPredicate(format: "areaName = %@ AND age IN %@", "Surrey Heath", ["15_19", "10_14"]),
-        animation: .default)
-    private var items: FetchedResults<AreaAgeDateCases>
+//    @FetchRequest(
+//        sortDescriptors: [NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: false)],
+//        predicate: NSPredicate(format: "areaName = %@ AND age IN %@", "Surrey Heath", ["15_19", "10_14"]),
+//        animation: .default)
+//    private var items: FetchedResults<AreaAgeDateCases>
+    @StateObject
+    var datesUseCase = DateUseCase(
+        areas: [Area(name: "Surrey Heath", id: "E07000214", populationsForAges: ["10_14" : 5000, "15_19": 5000])],
+        ages: [
+            "10_14",
+//            "15_19",
+        ],
+        context: {
+            let context = PersistenceController.shared.container.newBackgroundContext()
+            context.automaticallyMergesChangesFromParent = true
+            return context
+        }())
+    
+    
     @State private var isLoading: Bool = false
+    
+    private let rateFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.maximumFractionDigits = 1
+        return f
+    }()
     
     init() {
 
@@ -24,22 +44,32 @@ struct ContentView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.date!)")
-                    } label: {
-                        Text(item.date!)
-                        Spacer()
-                        Text("\(item.age!) cases: \(item.cases)")
+            ScrollView {
+                LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4)) {
+                    ForEach(datesUseCase.viewModel.cases.reversed()) { item in
+                        Text(item.date)
+                        Text("\(item.cases)")
+                        Text("\(item.lastWeekCases)")
+                        Text(item.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
                     }
                 }
-//                .onDelete(perform: deleteItems)
+    //            List {
+    //                ForEach(datesUseCase.viewModel.cases) { item in
+    //                    NavigationLink {
+    //                        Text("Item at \(item.date)")
+    //                    } label: {
+    //                        Text(item.date)
+    //                        Spacer()
+    //                        Text("Cases: \(item.cases)")
+    //                    }
+    //                }
+    //                .onDelete(perform: deleteItems)
+    //            }
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    EditButton()
+//                }
                 ToolbarItem {
                     Button(action: update) {
                         Label("Update", systemImage: "square.and.arrow.down.on.square")

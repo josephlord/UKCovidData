@@ -23,15 +23,17 @@ private let ltaCasesByAgeUrlDev = Bundle.main.url(
 
 func updateCases(url: URL = ltaCasesByAgeRemoteUrl, container: NSPersistentContainer = PersistenceController.shared.container) async throws {
     let context = container.newBackgroundContext()
-    try await clearCaseData(context: context)
+    let priorDate = Date.now - 1
     try await updateCaseData(url: url, context: context)
+    try await clearCaseData(beforeDate: priorDate, context: context)
     try context.save()
 }
 
-private func clearCaseData(context: NSManagedObjectContext) async throws {
+private func clearCaseData(beforeDate: Date, context: NSManagedObjectContext) async throws {
     try await context.perform {
         let fr = AreaAgeDateCases.fetchRequest()
         fr.returnsObjectsAsFaults = true
+        fr.predicate = NSPredicate(format: "timestamp < %@", beforeDate as NSDate)
         fr.fetchLimit = 10_000
         var hasMore = true
         while hasMore {
