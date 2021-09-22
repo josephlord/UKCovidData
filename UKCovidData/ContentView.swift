@@ -38,15 +38,18 @@ struct ContentView: View {
         return f
     }()
     
-    init() {
-
+    @State private var viewModelWhileLoading: CovidDataGroupViewModel?
+    
+    var viewModel: CovidDataGroupViewModel {
+        viewModelWhileLoading ?? datesUseCase.viewModel
     }
     
     var body: some View {
         NavigationView {
             ScrollView {
-                LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4)) {
-                    ForEach(datesUseCase.viewModel.cases.reversed()) { item in
+                LazyVGrid(
+                    columns: Array(repeating: .init(.flexible()), count: 4)) {
+                    ForEach(viewModel.cases.reversed()) { item in
                         Text(item.date)
                         Text("\(item.cases)")
                         Text("\(item.lastWeekCases)")
@@ -82,6 +85,7 @@ struct ContentView: View {
     
     private func update() {
         isLoading = true
+        viewModelWhileLoading = datesUseCase.viewModel
         Task {
             do {
                 try await updateCases()
@@ -89,6 +93,7 @@ struct ContentView: View {
                 print(error)
             }
             isLoading = false
+            viewModelWhileLoading = nil
         }
     }
 
