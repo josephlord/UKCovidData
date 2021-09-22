@@ -19,6 +19,58 @@ private let ltaCasesByAgeUrlDev = Bundle.main.url(
     forResource: "LTLA_case_data_by_age",
     withExtension: "csv")!
 
+func updatePopulations(url: URL = populationUrlDev, container: NSPersistentContainer = PersistenceController.shared.container) async throws {
+    let context = container.newBackgroundContext()
+    try await clear()
+    try await update()
+    try context.save()
+    
+    func clear() async throws {
+        try await context.perform {
+            let fr = AreaAgeDemographics.fetchRequest()
+            fr.returnsObjectsAsFaults = true
+            fr.fetchLimit = 10_000
+            var hasMore = true
+            while hasMore {
+            print("About to delete")
+                let results = try fr.execute()
+                hasMore = !results.isEmpty
+                results.forEach { context.delete($0) }
+                print("Deletion done")
+                try context.save()
+                print("Saved after delete")
+            }
+            print("Finished deletion")
+        }
+    }
+    
+    func update() async throws {
+       var firstline = true
+        
+        for try await line in url.lines {
+            if !firstline {
+                _ = try AreaAgeDemographics(csvString: line, context: context)
+            } else {
+                firstline = false
+                guard line == "category,areaCode,gender,age,population" else { throw DataUpdateError.unexpectedColumnHeaders }
+            }
+        }
+    }
+}
+
+extension AreaAgeDemographics {
+    convenience init?(csvString: String, context: NSManagedObjectContext) throws {
+        let values = csvString.split(separator: ",", enclosure: "\"")
+        guard values.count == 5,
+              let population = Int32(values[4])
+        else { throw DataUpdateError.unexpectedValueCount }
+        guard values[0] == "AGE_ONLY" && values[2] == "ALL" else { return nil } // We are are ignoring gender specific data
+        self.init(context: context)
+        areaCode = values[1]
+        age = values[3]
+        self.population = population
+    }
+}
 
 
 func updateCases(url: URL = ltaCasesByAgeRemoteUrl, container: NSPersistentContainer = PersistenceController.shared.container) async throws {
@@ -50,13 +102,15 @@ private func clearCaseData(beforeDate: Date, context: NSManagedObjectContext) as
 }
 
 private func updateCaseData(url: URL, context: NSManagedObjectContext) async throws {
+    var areaCodes = [String: String]()
     var firstLine = true
     let timeStamp = Date()
     var dataItemCount = 0
     for try await line in url.lines {
         if !firstLine {
             try await context.perform(schedule: .immediate) {
-                _ = try AreaAgeDateCases(csvString: line, timeStamp: timeStamp, context: context)
+                let value = try AreaAgeDateCases(csvString: line, timeStamp: timeStamp, context: context)
+                areaCodes[value.areaCode!] = value.areaName
             }
             dataItemCount += 1
             if dataItemCount.isMultiple(of: 10000) {
@@ -67,6 +121,21 @@ private func updateCaseData(url: URL, context: NSManagedObjectContext) async thr
             firstLine = false
             guard line == "areaCode,areaName,areaType,date,age,cases,rollingSum,rollingRate"
             else { throw DataUpdateError.unexpectedColumnHeaders }
+        }
+    }
+    if !areaCodes.isEmpty {
+        try await context.perform {
+            var itr = areaCodes.makeIterator()
+            let batchInsert = NSBatchInsertRequest(entity: AreaCodeName.entity()) { (object: NSManagedObject) in
+                guard let next = itr.next() else { return false }
+                guard let areaCode = object as? AreaCodeName else { fatalError() }
+                areaCode.areaName = next.key
+                areaCode.areaCode = next.value
+                return true
+            }
+            do {
+                try context.execute(batchInsert)
+            }
         }
     }
     print("Data import complete. Count: \(dataItemCount)")

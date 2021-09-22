@@ -15,6 +15,13 @@ struct UKCovidDataApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .task {
+                    do {
+                        try await updatePopulations()
+                    } catch {
+                        fatalError(error.localizedDescription)
+                    }
+                }
         }
     }
 }

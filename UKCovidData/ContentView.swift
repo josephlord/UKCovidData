@@ -44,6 +44,8 @@ struct ContentView: View {
         viewModelWhileLoading ?? datesUseCase.viewModel
     }
     
+    @State var searchText: String = "Surrey Heath"
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -69,6 +71,9 @@ struct ContentView: View {
     //                .onDelete(perform: deleteItems)
     //            }
             }
+//            .searchable(text: $searchText) {
+//
+//            }
             .toolbar {
 //                ToolbarItem(placement: .navigationBarTrailing) {
 //                    EditButton()
@@ -79,7 +84,7 @@ struct ContentView: View {
                     }.disabled(isLoading)
                 }
             }
-            Text("Select an item")
+            .navigationTitle(Text(datesUseCase.viewModel.areas.first?.name ?? ""))
         }
     }
     
