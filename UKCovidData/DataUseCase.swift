@@ -9,7 +9,7 @@ import Foundation
 import CoreData
 import DequeModule
 
-struct Area : Sendable {
+struct Area : Sendable, Identifiable{
     var name: String
     var id: String
     var populationsForAges: [String: Int32]
@@ -64,7 +64,7 @@ class DateUseCase : ObservableObject {
         }
     }
     
-    var ages: [String] = [] {
+    var ages: [String] = ["10_14"] {
         didSet {
             updatePredicate()
         }
@@ -171,6 +171,8 @@ class SearchUseCase : ObservableObject {
     
     init(container: NSPersistentContainer) {
         self.container = container
+        searchString = ""
+        updateResults()
     }
     
     @MainActor
@@ -178,43 +180,53 @@ class SearchUseCase : ObservableObject {
         self.areas = areas
     }
     
-    var searchString: String {
+    fileprivate func fetchAreas(search: String, context: NSManagedObjectContext) throws -> [Area] {
+        let areasFR = AreaCodeName.fetchRequest()
+//        areasFR.fetchLimit = 8
+        areasFR.sortDescriptors = [NSSortDescriptor(keyPath: \AreaCodeName.areaName, ascending: true)]
+        if !searchString.isEmpty {
+            areasFR.predicate = NSPredicate(format: "areaName CONTAINS[c] %@", search)
+        }
+        let areasO = try context.fetch(areasFR)
+        
+        let populationsFR = AreaAgeDemographics.fetchRequest()
+        populationsFR.predicate = NSPredicate(format: "areaCode IN %@", areasO.compactMap { $0.areaCode })
+        let populations = try context.fetch(populationsFR)
+        
+        let areas = areasO.map { area in
+            Area(
+                name: area.areaName!,
+                id: area.areaCode!,
+                populationsForAges: Dictionary(uniqueKeysWithValues: populations
+                                                .filter { $0.areaCode == area.areaCode }
+                                                .map { ($0.age!, $0.population) })
+            )
+        }
+        return areas
+    }
+    
+    var searchString: String = "" {
         didSet {
-            guard !searchString.isEmpty else {
-                areas = []
-                return
-            }
-            let context = container.newBackgroundContext()
-            let search = searchString
-            Task {
-                do {
-                    let areas = try await context.perform {
-                        let areasFR = AreaCodeName.fetchRequest()
-                        areasFR.fetchLimit = 8
-                        areasFR.sortDescriptors = [NSSortDescriptor(keyPath: \AreaCodeName.areaName, ascending: true)]
-                        areasFR.predicate = NSPredicate(format: "areaName CONTAINS[c] %@", search)
-                        let areasO = try context.fetch(areasFR)
-                        
-                        let populationsFR = AreaAgeDemographics.fetchRequest()
-                        populationsFR.predicate = NSPredicate(format: "areaCode IN %@", areasO.compactMap { $0.areaCode })
-                        let populations = try context.fetch(populationsFR)
-                        
-                        let areas = areasO.map { area in
-                            Area(
-                                name: area.areaName!,
-                                id: area.areaCode!,
-                                populationsForAges: Dictionary(uniqueKeysWithValues: populations
-                                    .filter { $0.areaCode == area.areaCode }
-                                    .map { ($0.age!, $0.population) })
-                                )
-                        }
-                        return areas
+            updateResults()
+//            guard !searchString.isEmpty else {
+//                areas = []
+//                return
+//            }
+        }
+    }
+    
+    private func updateResults() {
+        let context = container.newBackgroundContext()
+        let search = searchString
+        Task {
+            do {
+                let areas = try await context.perform {
+                    return try self.fetchAreas(search: search, context: context)
 //                        await self.updateAreas(areas: areas)
-                    }
-                    await updateAreas(areas: areas)
-                } catch {
-                    fatalError(error.localizedDescription)
                 }
+                await updateAreas(areas: areas)
+            } catch {
+                fatalError(error.localizedDescription)
             }
         }
     }

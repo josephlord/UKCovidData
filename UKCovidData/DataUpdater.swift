@@ -127,14 +127,15 @@ private func updateCaseData(url: URL, context: NSManagedObjectContext) async thr
         try await context.perform {
             var itr = areaCodes.makeIterator()
             let batchInsert = NSBatchInsertRequest(entity: AreaCodeName.entity()) { (object: NSManagedObject) in
-                guard let next = itr.next() else { return false }
+                guard let next = itr.next() else { return true }
                 guard let areaCode = object as? AreaCodeName else { fatalError() }
-                areaCode.areaName = next.key
-                areaCode.areaCode = next.value
-                return true
+                areaCode.areaName = next.value
+                areaCode.areaCode = next.key
+                return false
             }
             do {
-                try context.execute(batchInsert)
+                let result = try context.execute(batchInsert)
+                print("Batch insert result: \(result)")
             }
         }
         try context.save()

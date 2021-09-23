@@ -41,6 +41,7 @@ struct ContentView: View {
     }()
     
     @State private var viewModelWhileLoading: CovidDataGroupViewModel?
+    @State private var showAreas = true
     
     var currentAreaName: String { datesUseCase.viewModel.areas.first?.name ?? ""}
     
@@ -48,7 +49,11 @@ struct ContentView: View {
         viewModelWhileLoading ?? datesUseCase.viewModel
     }
     
-    @State var searchText: String = ""
+//    @State var searchText: String = "" {
+//        didSet {
+//            searchUseCase.searchString = searchText
+//        }
+//    }
     
     var body: some View {
         NavigationView {
@@ -62,6 +67,25 @@ struct ContentView: View {
                         Text(item.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
                     }
                 }
+//                    .searchable(text: $searchUseCase.searchString) {
+//                        ForEach(searchUseCase.areas) { area in
+//                            Text(area.name).searchCompletion(area.name)
+//                        }
+                
+//                        if searchUseCase.searchString == "" || searchUseCase.searchString == currentAreaName {
+//                            EmptyView()
+//                        } else {
+//                            List() {
+//                                ForEach(searchUseCase.areas) { area in
+//                                    Button(action: { datesUseCase.areas = [area] }) {
+//                                        Text(area.name)
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+                
+                
     //            List {
     //                ForEach(datesUseCase.viewModel.cases) { item in
     //                    NavigationLink {
@@ -75,17 +99,16 @@ struct ContentView: View {
     //                .onDelete(perform: deleteItems)
     //            }
             }
-            .searchable(text: $searchText) {
-                if searchText == "" || searchText == currentAreaName {
-                    EmptyView()
-                } else {
-                    
-                }
-            }
+            
             .toolbar {
 //                ToolbarItem(placement: .navigationBarTrailing) {
 //                    EditButton()
 //                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showAreas = true } ) {
+                        Text("Areas")
+                    }
+                }
                 ToolbarItem {
                     Button(action: update) {
                         Label("Update", systemImage: "square.and.arrow.down.on.square")
@@ -93,6 +116,21 @@ struct ContentView: View {
                 }
             }
             .navigationTitle(Text(currentAreaName))
+        }.popover(isPresented: $showAreas) {
+            TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
+//            ScrollView {
+                
+                List() {
+                    ForEach(searchUseCase.areas) { area in
+                        Button(action: {
+                            datesUseCase.areas = [area]
+                            showAreas = false
+                        }) {
+                            Text(area.name)
+                        }
+                    }
+//                }//.searchable(text: $searchUseCase.searchString)
+            }
         }
     }
     
