@@ -68,7 +68,7 @@ class DateUseCase : ObservableObject {
         }
     }
     
-    var ages: [String] = ["10_14"] {
+    var ages: [String] = [] {
         didSet {
             updatePredicate()
         }
