@@ -9,7 +9,7 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    //@Environment(\.managedObjectContext) private var viewContext
 
     @StateObject
     var datesUseCase = DateUseCase(
@@ -27,6 +27,7 @@ struct ContentView: View {
     private let rateFormatter: NumberFormatter = {
         let f = NumberFormatter()
         f.maximumFractionDigits = 1
+        f.minimumFractionDigits = 1
         return f
     }()
     
@@ -34,31 +35,45 @@ struct ContentView: View {
     @State private var showAreas = true
     @State private var showAges = false
     
-    var currentAreaName: String { datesUseCase.viewModel.areas.first?.name ?? ""}
+    @State private var currentAreaName: String = ""
     
     var viewModel: CovidDataGroupViewModel {
         viewModelWhileLoading ?? datesUseCase.viewModel
+    }
+    
+//    @State private var ages: [String]
+    
+    var selectedAgesString: String {
+        datesUseCase.ages.joined(separator: ", ")
     }
     
     @StateObject var ageOptions = AgeOptions()
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                LazyVGrid(
-                    columns: Array(repeating: .init(.flexible()), count: 4)) {
-                        Text("Date").font(.headline)
-                        Text("Day").font(.headline)
-                        Text("7 Day").font(.headline)
-                        Text("7 Day / 100,000").font(.headline)
-                    ForEach(viewModel.cases.reversed()) { item in
-                        Text(item.date)
-                        Text("\(item.cases)")
-                        Text("\(item.lastWeekCases)")
-                        Text(item.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
+            VStack {
+                Text(selectedAgesString)
+                ScrollView {
+                    LazyVGrid(
+                        columns: [.init(.flexible()), .init(.flexible()), .init(.flexible()), .init(.flexible())]) {
+                            Text("Date").font(.headline)
+                            Text("Day").font(.headline)
+                            Text("7 Day").font(.headline)
+                            Text("7 Day / 100,000").font(.headline)
+                        ForEach(viewModel.cases.reversed()) { item in
+                            Text(item.date)
+                            Text("\(item.cases)")
+                            Text("\(item.lastWeekCases)")
+                            HStack {
+                                Spacer()
+                                Text(item.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
+                            }
+                        }
                     }
+                    .navigationTitle(currentAreaName)
                 }
             }
+            
             .popover(isPresented: $showAreas) {
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
                     
@@ -67,6 +82,7 @@ struct ContentView: View {
                         Button(action: {
                             datesUseCase.areas = [area]
                             showAreas = false
+                            currentAreaName = area.name
                         }) {
                             Text(area.name)
                         }
@@ -99,8 +115,9 @@ struct ContentView: View {
                     }.disabled(isLoading)
                 }
             }
-            .navigationTitle(Text(currentAreaName))
-        }.onAppear {
+    
+        }
+        .onAppear {
             if datesUseCase.ages.isEmpty {
                 datesUseCase.ages = ageOptions.options.filter { $0.isEnabled }.map { $0.id }
             }

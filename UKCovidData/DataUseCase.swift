@@ -62,13 +62,13 @@ class DateUseCase : ObservableObject {
     @Published var viewModel: CovidDataGroupViewModel
     private let fetchedResultsController: NSFetchedResultsController<AreaAgeDateCases>
     
-    var areas: [Area] = [] {
+    @Published var areas: [Area] = [] {
         didSet {
             updatePredicate()
         }
     }
     
-    var ages: [String] = [] {
+    @Published var ages: [String] = [] {
         didSet {
             updatePredicate()
         }
