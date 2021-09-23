@@ -113,7 +113,7 @@ private func updateCaseData(url: URL, context: NSManagedObjectContext) async thr
                 areaCodes[value.areaCode!] = value.areaName
             }
             dataItemCount += 1
-            if dataItemCount.isMultiple(of: 10000) {
+            if dataItemCount.isMultiple(of: 10_000) {
                 print(dataItemCount)
                 try context.save()
             }

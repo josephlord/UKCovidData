@@ -100,6 +100,10 @@ struct ContentView: View {
                 }
             }
             .navigationTitle(Text(currentAreaName))
+        }.onAppear {
+            if datesUseCase.ages.isEmpty {
+                datesUseCase.ages = ageOptions.options.filter { $0.isEnabled }.map { $0.id }
+            }
         }
     }
     
@@ -130,10 +134,9 @@ struct AgeOption : Identifiable, Equatable {
     var isEnabled: Bool
     var id: String { age }
     
-    
     static private let ages = ["00_04", "05_09", "10_14", "15_19", "20_24", "25_29", "30_34", "35_39", "40_44",
                       "45_49", "50_54", "55_59", "60_64", "65_69", "70_74", "75_79", "80_84", "85_89", "90+"]
-    static var ageOptions = ages.map { AgeOption(age: $0, isEnabled: true) }
+    static var ageOptions = ages.map { AgeOption(age: $0, isEnabled: $0 == "10_14") }
 }
 
 class AgeOptions : ObservableObject {

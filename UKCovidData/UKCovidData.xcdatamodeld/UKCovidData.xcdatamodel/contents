@@ -8,11 +8,24 @@
         <attribute name="cases" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="date" attributeType="String"/>
         <attribute name="timestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="age"/>
+                <constraint value="areaCode"/>
+                <constraint value="date"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="AreaAgeDemographics" representedClassName="AreaAgeDemographics" syncable="YES" codeGenerationType="class">
         <attribute name="age" optional="YES" attributeType="String"/>
         <attribute name="areaCode" attributeType="String"/>
         <attribute name="population" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="age"/>
+                <constraint value="areaCode"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="AreaCodeName" representedClassName="AreaCodeName" syncable="YES" codeGenerationType="class">
         <attribute name="areaCode" attributeType="String"/>
