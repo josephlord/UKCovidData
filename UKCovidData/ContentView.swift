@@ -11,18 +11,8 @@ import CoreData
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-//    @FetchRequest(
-//        sortDescriptors: [NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: false)],
-//        predicate: NSPredicate(format: "areaName = %@ AND age IN %@", "Surrey Heath", ["15_19", "10_14"]),
-//        animation: .default)
-//    private var items: FetchedResults<AreaAgeDateCases>
     @StateObject
     var datesUseCase = DateUseCase(
-//            areas: [Area(name: "Surrey Heath", id: "E07000214", populationsForAges: ["10_14" : 5000, "15_19": 5000])],
-//            ages: [
-//                "10_14",
-//    //            "15_19",
-//            ],
             context: {
                 let context = PersistenceController.shared.container.newBackgroundContext()
                 context.automaticallyMergesChangesFromParent = true
@@ -49,11 +39,6 @@ struct ContentView: View {
         viewModelWhileLoading ?? datesUseCase.viewModel
     }
     
-//    @State var searchText: String = "" {
-//        didSet {
-//            searchUseCase.searchString = searchText
-//        }
-//    }
     
     var body: some View {
         NavigationView {
@@ -67,43 +52,9 @@ struct ContentView: View {
                         Text(item.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
                     }
                 }
-//                    .searchable(text: $searchUseCase.searchString) {
-//                        ForEach(searchUseCase.areas) { area in
-//                            Text(area.name).searchCompletion(area.name)
-//                        }
-                
-//                        if searchUseCase.searchString == "" || searchUseCase.searchString == currentAreaName {
-//                            EmptyView()
-//                        } else {
-//                            List() {
-//                                ForEach(searchUseCase.areas) { area in
-//                                    Button(action: { datesUseCase.areas = [area] }) {
-//                                        Text(area.name)
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-                
-                
-    //            List {
-    //                ForEach(datesUseCase.viewModel.cases) { item in
-    //                    NavigationLink {
-    //                        Text("Item at \(item.date)")
-    //                    } label: {
-    //                        Text(item.date)
-    //                        Spacer()
-    //                        Text("Cases: \(item.cases)")
-    //                    }
-    //                }
-    //                .onDelete(perform: deleteItems)
-    //            }
             }
             
             .toolbar {
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    EditButton()
-//                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showAreas = true } ) {
                         Text("Areas")
@@ -118,19 +69,17 @@ struct ContentView: View {
             .navigationTitle(Text(currentAreaName))
         }.popover(isPresented: $showAreas) {
             TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
-//            ScrollView {
                 
-                List() {
-                    ForEach(searchUseCase.areas) { area in
-                        Button(action: {
-                            datesUseCase.areas = [area]
-                            showAreas = false
-                        }) {
-                            Text(area.name)
-                        }
+            List() {
+                ForEach(searchUseCase.areas) { area in
+                    Button(action: {
+                        datesUseCase.areas = [area]
+                        showAreas = false
+                    }) {
+                        Text(area.name)
                     }
-//                }//.searchable(text: $searchUseCase.searchString)
-            }
+                }
+            }//.searchable(text: $searchUseCase.searchString)
         }
     }
     

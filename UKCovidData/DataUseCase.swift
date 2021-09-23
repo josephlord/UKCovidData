@@ -13,6 +13,10 @@ struct Area : Sendable, Identifiable{
     var name: String
     var id: String
     var populationsForAges: [String: Int32]
+    
+    func populationTotal(ages: [String]) -> Int {
+        Int(ages.reduce(0) { $0 + populationsForAges[$1]! })
+    }
 }
 
 struct DateCaseValue : Sendable, Identifiable {
@@ -70,6 +74,10 @@ class DateUseCase : ObservableObject {
         }
     }
     
+    private var groupPopulation: Int {
+        areas.map { $0.populationTotal(ages: ages) }.reduce(0,+)
+    }
+    
     private lazy var frcSequence = FRCAsyncSequence(fRC: fetchedResultsController, mapper: AreaAgeCasesEntity.init)
     
     private func updatePredicate() {
@@ -110,9 +118,7 @@ class DateUseCase : ObservableObject {
             cacheName: nil)
         Task {
             var model = CovidDataGroupViewModel(areas: areas, ages: ages, cases: [])
-            let groupPopulation = areas.reduce(0) { sum, area in
-                sum + Int(ages.reduce(0) { $0 + area.populationsForAges[$1]! })
-            }
+           
             for try await update in frcSequence {
                 model.cases = combineCases(entites: update, population: groupPopulation)
                 await updatePublished(newValue: model)
