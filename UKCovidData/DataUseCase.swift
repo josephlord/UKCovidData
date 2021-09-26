@@ -218,7 +218,7 @@ class SearchUseCase : ObservableObject {
     fileprivate func fetchCases(areas: [Area], context: NSManagedObjectContext) throws -> [Area] {
         let weekRecordsCount = ages.count * 7
         let fetchRequest = AreaAgeDateCases.fetchRequest()
-        fetchRequest.fetchLimit = weekRecordsCount * 14 // Last two week's data
+        fetchRequest.fetchLimit = weekRecordsCount * 2 // Last two week's data
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: false)]
         let agesPredicate = NSPredicate(format: "age in %@", ages)
         let updatedAreas: [Area] = try areas.map { originalArea in
