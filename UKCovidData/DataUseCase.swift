@@ -179,6 +179,8 @@ class SearchUseCase : ObservableObject {
         self.container = container
         searchString = ""
         updateResults()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateResults), name: .persistenceControllerReset, object: nil)
     }
     
     @MainActor
@@ -221,7 +223,7 @@ class SearchUseCase : ObservableObject {
         }
     }
     
-    private func updateResults() {
+    @objc private func updateResults() {
         let context = container.newBackgroundContext()
         let search = searchString
         Task {

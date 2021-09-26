@@ -67,6 +67,7 @@ struct ContentView: View {
                             HStack {
                                 Spacer()
                                 Text(item.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
+                                    .padding(.trailing, 8)
                             }
                         }
                     }
@@ -95,11 +96,27 @@ struct ContentView: View {
             .sheet(
                 isPresented: $showAges,
                 onDismiss: { datesUseCase.ages = ageOptions.options.filter { $0.isEnabled }.map { $0.age } }) {
-                List() {
-                    ForEach($ageOptions.options.indices, id: \.self) { index in
-                        Toggle(isOn: $ageOptions.options[index].isEnabled, label: { Text(ageOptions.options[index].age) })
+                    VStack {
+                        HStack {
+                            Button(action: {
+                                ageOptions.setAll(enabled: true)
+                            }, label: { Text("Enable All") })
+                                .padding()
+                                .border(Color.blue)
+                            Spacer()
+                            Button(action: {
+                                ageOptions.setAll(enabled: false)
+                            }, label: { Text("Disable All") })
+                                .padding()
+                                .border(Color.blue)
+                        }.padding()
+                        List() {
+                            
+                            ForEach($ageOptions.options.indices, id: \.self) { index in
+                                Toggle(isOn: $ageOptions.options[index].isEnabled, label: { Text(ageOptions.options[index].age) })
+                            }
+                        }
                     }
-                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -161,6 +178,14 @@ struct AgeOption : Identifiable, Equatable {
 
 class AgeOptions : ObservableObject {
     @Published var options = AgeOption.ageOptions
+    
+    func setAll(enabled: Bool) {
+        var tmp = options
+        tmp.indices.forEach {
+            tmp[$0].isEnabled = enabled
+        }
+        options = tmp
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {

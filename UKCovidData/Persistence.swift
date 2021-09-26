@@ -7,6 +7,10 @@
 
 import CoreData
 
+extension Notification.Name {
+    static let persistenceControllerReset = Self.init(rawValue: "PersistenceControllerReset")
+}
+
 struct PersistenceController {
     static let shared = PersistenceController()
 
@@ -44,6 +48,7 @@ struct PersistenceController {
         container.viewContext.reset()
         var tmp = self
         tmp.readingBackgroundContext.reset()
+        NotificationCenter.default.post(name: .persistenceControllerReset, object: nil)
     }
 
     init(inMemory: Bool = false) {
