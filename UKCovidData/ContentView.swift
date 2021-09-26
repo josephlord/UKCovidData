@@ -14,7 +14,7 @@ struct ContentView: View {
     @StateObject
     var datesUseCase = DateUseCase(
             context: {
-                let context = PersistenceController.shared.container.newBackgroundContext()
+                let context = PersistenceController.shared.container.viewContext
                 context.automaticallyMergesChangesFromParent = true
                 return context
             }())
@@ -76,6 +76,9 @@ struct ContentView: View {
             
             .popover(isPresented: $showAreas) {
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
+                    .padding()
+                    .border(Color.blue)
+                    .padding()
                     
                 List() {
                     ForEach(searchUseCase.areas) { area in

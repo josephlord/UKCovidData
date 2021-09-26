@@ -21,28 +21,29 @@ private let ltaCasesByAgeUrlDev = Bundle.main.url(
 
 func updatePopulations(url: URL = populationUrlDev, container: NSPersistentContainer = PersistenceController.shared.container) async throws {
     let context = container.newBackgroundContext()
-    try await clear()
+    context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+//    try await clear()
     try await update()
     try context.save()
     
-    func clear() async throws {
-        try await context.perform {
-            let fr = AreaAgeDemographics.fetchRequest()
-            fr.returnsObjectsAsFaults = true
-            fr.fetchLimit = 10_000
-            var hasMore = true
-            while hasMore {
-            print("About to delete")
-                let results = try fr.execute()
-                hasMore = !results.isEmpty
-                results.forEach { context.delete($0) }
-                print("Deletion done")
-                try context.save()
-                print("Saved after delete")
-            }
-            print("Finished deletion")
-        }
-    }
+//    func clear() async throws {
+//        try await context.perform {
+//            let fr = AreaAgeDemographics.fetchRequest()
+//            fr.returnsObjectsAsFaults = true
+//            fr.fetchLimit = 10_000
+//            var hasMore = true
+//            while hasMore {
+//            print("About to delete")
+//                let results = try fr.execute()
+//                hasMore = !results.isEmpty
+//                results.forEach { context.delete($0) }
+//                print("Deletion done")
+//                try context.save()
+//                print("Saved after delete")
+//            }
+//            print("Finished deletion")
+//        }
+//    }
     
     func update() async throws {
        var firstline = true
@@ -75,47 +76,69 @@ extension AreaAgeDemographics {
 
 func updateCases(url: URL = ltaCasesByAgeRemoteUrl, container: NSPersistentContainer = PersistenceController.shared.container) async throws {
     let context = container.newBackgroundContext()
-    let priorDate = Date.now - 1
+    context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+//    let priorDate = Date.now - 1
     try await updateCaseData(url: url, context: context)
-    try await clearCaseData(beforeDate: priorDate, context: context)
+//    try await clearCaseData(beforeDate: priorDate, context: context)
     try context.save()
 }
 
-private func clearCaseData(beforeDate: Date, context: NSManagedObjectContext) async throws {
+//private func clearCaseData(beforeDate: Date, context: NSManagedObjectContext) async throws {
+//    try await context.perform {
+//        let fr = AreaAgeDateCases.fetchRequest()
+//        fr.returnsObjectsAsFaults = true
+//        fr.predicate = NSPredicate(format: "timestamp < %@", beforeDate as NSDate)
+//        fr.fetchLimit = 10_000
+//        var hasMore = true
+//        while hasMore {
+//        print("About to delete")
+//            let results = try fr.execute()
+//            hasMore = !results.isEmpty
+//            results.forEach { context.delete($0) }
+//            print("Deletion done")
+//            try context.save()
+//            print("Saved after delete")
+//        }
+//        print("Finished deletion")
+//    }
+//}
+
+/// returns areacode, areaname
+private func batchWriteLinesToCaseData(lines: [String], areaCodes: inout [String: String], context: NSManagedObjectContext) async throws {
+    var areaCodeTmp = areaCodes
     try await context.perform {
-        let fr = AreaAgeDateCases.fetchRequest()
-        fr.returnsObjectsAsFaults = true
-        fr.predicate = NSPredicate(format: "timestamp < %@", beforeDate as NSDate)
-        fr.fetchLimit = 10_000
-        var hasMore = true
-        while hasMore {
-        print("About to delete")
-            let results = try fr.execute()
-            hasMore = !results.isEmpty
-            results.forEach { context.delete($0) }
-            print("Deletion done")
-            try context.save()
-            print("Saved after delete")
+        var itr = lines.makeIterator()
+        let batchInsert = NSBatchInsertRequest(entity: AreaAgeDateCases.entity()) { (object: NSManagedObject) in
+            guard let next = itr.next() else { return true }
+            guard let aadc = object as? AreaAgeDateCases else { fatalError() }
+            do {
+                try aadc.updateFromCSV(csvString: next)
+            } catch {
+                fatalError(error.localizedDescription)
+            }
+            areaCodeTmp[aadc.areaCode!] = aadc.areaName
+            return false
         }
-        print("Finished deletion")
+        let result = try context.execute(batchInsert)
+        print("Batch insert result: \(String(describing: result))")
     }
+    areaCodes = areaCodeTmp
+    try context.save()
 }
 
 private func updateCaseData(url: URL, context: NSManagedObjectContext) async throws {
     var areaCodes = [String: String]()
     var firstLine = true
-    let timeStamp = Date()
     var dataItemCount = 0
+    var linesBatch: [String] = []
     for try await line in url.lines {
         if !firstLine {
-            try await context.perform(schedule: .immediate) {
-                let value = try AreaAgeDateCases(csvString: line, timeStamp: timeStamp, context: context)
-                areaCodes[value.areaCode!] = value.areaName
-            }
+            linesBatch.append(line)
             dataItemCount += 1
-            if dataItemCount.isMultiple(of: 10_000) {
+            if dataItemCount.isMultiple(of: 1 << 13) {
+                try await batchWriteLinesToCaseData(lines: linesBatch, areaCodes: &areaCodes, context: context)
                 print(dataItemCount)
-                try context.save()
+                linesBatch = []
             }
         } else {
             firstLine = false
@@ -123,6 +146,8 @@ private func updateCaseData(url: URL, context: NSManagedObjectContext) async thr
             else { throw DataUpdateError.unexpectedColumnHeaders }
         }
     }
+    try await batchWriteLinesToCaseData(lines: linesBatch, areaCodes: &areaCodes, context: context)
+    print("Cases insert complete: \(dataItemCount) case numbers")
     if !areaCodes.isEmpty {
         try await context.perform {
             var itr = areaCodes.makeIterator()
@@ -140,6 +165,7 @@ private func updateCaseData(url: URL, context: NSManagedObjectContext) async thr
         }
         try context.save()
     }
+    PersistenceController.shared.resetPersistentContexts()
 //    PersistenceController.shared.container
     print("Data import complete. Count: \(dataItemCount)")
 }
@@ -151,8 +177,7 @@ enum DataUpdateError : Error {
 }
 
 extension AreaAgeDateCases {
-    convenience init(csvString: String, timeStamp: Date, context: NSManagedObjectContext) throws {
-        self.init(context: context)
+   func updateFromCSV(csvString: String) throws {
         let values = csvString.split(separator: ",", enclosure: "\"")
         guard values.count > 6 else {
             print(csvString)
@@ -162,7 +187,6 @@ extension AreaAgeDateCases {
             print(csvString)
             throw DataUpdateError.unexpectedCaseType
         }
-        timestamp = timeStamp
         age = String(values[4])
         areaCode = String(values[0])
         areaName = String(values[1])

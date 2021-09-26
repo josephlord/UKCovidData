@@ -15,7 +15,6 @@ struct PersistenceController {
         let viewContext = result.container.viewContext
         for _ in 0..<10 {
             let newItem = AreaAgeDateCases(context: viewContext)
-            newItem.timestamp = Date()
             newItem.age = "10_14"
             newItem.areaCode = "12345"
             newItem.areaName = "A borough"
@@ -35,6 +34,17 @@ struct PersistenceController {
     }()
 
     let container: NSPersistentContainer
+    private(set) lazy var readingBackgroundContext: NSManagedObjectContext = {
+        let context = container.newBackgroundContext()
+        context.automaticallyMergesChangesFromParent = true
+        return context
+    }()
+    
+    func resetPersistentContexts() {
+        container.viewContext.reset()
+        var tmp = self
+        tmp.readingBackgroundContext.reset()
+    }
 
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "UKCovidData")
