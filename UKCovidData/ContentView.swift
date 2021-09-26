@@ -10,17 +10,26 @@ import CoreData
 
 struct ContentView: View {
     //@Environment(\.managedObjectContext) private var viewContext
+    fileprivate static let initialAgeSelection = "10_14"
 
     @StateObject
-    var datesUseCase = DateUseCase(
+    var datesUseCase: DateUseCase = {
+        let useCase = DateUseCase(
             context: {
                 let context = PersistenceController.shared.container.viewContext
                 context.automaticallyMergesChangesFromParent = true
                 return context
             }())
+        useCase.ages = [Self.initialAgeSelection]
+        return useCase
+    }()
     
     @StateObject
-    var searchUseCase: SearchUseCase = SearchUseCase(container: PersistenceController.shared.container)
+    var searchUseCase: SearchUseCase = {
+        let useCase = SearchUseCase(container: PersistenceController.shared.container)
+        useCase.ages = [Self.initialAgeSelection]
+        return useCase
+    }()
     
     @State private var isLoading: Bool = false
     
@@ -88,14 +97,23 @@ struct ContentView: View {
                             showAreas = false
                             currentAreaName = area.name
                         }) {
-                            Text(area.name)
+                            HStack {
+                                Text(area.name)
+                                Spacer()
+                                Text(area.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
+                                Color.clear.frame(width: 12)
+                                Text(area.lastWeekCaseGrowth.flatMap { rateFormatter.string(for: $0 * 100) } ?? "-")
+                            }
                         }
                     }
                 }
             }
             .sheet(
                 isPresented: $showAges,
-                onDismiss: { datesUseCase.ages = ageOptions.options.filter { $0.isEnabled }.map { $0.age } }) {
+                onDismiss: {
+                    datesUseCase.ages = ageOptions.options.filter { $0.isEnabled }.map { $0.age }
+                    searchUseCase.ages = datesUseCase.ages
+                }) {
                     VStack {
                         HStack {
                             Button(action: {
@@ -173,7 +191,7 @@ struct AgeOption : Identifiable, Equatable {
     
     static private let ages = ["00_04", "05_09", "10_14", "15_19", "20_24", "25_29", "30_34", "35_39", "40_44",
                       "45_49", "50_54", "55_59", "60_64", "65_69", "70_74", "75_79", "80_84", "85_89", "90+"]
-    static var ageOptions = ages.map { AgeOption(age: $0, isEnabled: $0 == "10_14") }
+    static var ageOptions = ages.map { AgeOption(age: $0, isEnabled: $0 == ContentView.initialAgeSelection) }
 }
 
 class AgeOptions : ObservableObject {

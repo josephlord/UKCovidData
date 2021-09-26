@@ -13,6 +13,8 @@ struct Area : Sendable, Identifiable{
     var name: String
     var id: String
     var populationsForAges: [String: Int32]
+    var lastWeekCaseRate: Double?
+    var lastWeekCaseGrowth: Double?
     
     func populationTotal(ages: [String]) -> Int {
         Int(ages.reduce(0) { $0 + populationsForAges[$1]! })
@@ -213,6 +215,31 @@ class SearchUseCase : ObservableObject {
         return areas
     }
     
+    fileprivate func fetchCases(areas: [Area], context: NSManagedObjectContext) throws -> [Area] {
+        let weekRecordsCount = ages.count * 7
+        let fetchRequest = AreaAgeDateCases.fetchRequest()
+        fetchRequest.fetchLimit = weekRecordsCount * 14 // Last two week's data
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: false)]
+        let agesPredicate = NSPredicate(format: "age in %@", ages)
+        let updatedAreas: [Area] = try areas.map { originalArea in
+            var updated = originalArea
+            let areaPredicate = NSPredicate(format: "areaCode = %@", originalArea.id)
+            fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [areaPredicate, agesPredicate])
+            let areaCases = try fetchRequest.execute()
+            assert(areaCases.count == fetchRequest.fetchLimit)
+            let mostRecentWeekTotal = areaCases.prefix(weekRecordsCount).reduce(0) { $0 + $1.cases }
+            let previousWeekTotal = areaCases.suffix(weekRecordsCount).reduce(0) { $0 + $1.cases }
+            updated.lastWeekCaseGrowth = previousWeekTotal > 0 ? Double(mostRecentWeekTotal - previousWeekTotal) / Double(previousWeekTotal) : (mostRecentWeekTotal > 0 ? Double.infinity : 0)
+            let population = originalArea.populationTotal(ages: ages)
+            guard population > 0 else { fatalError() }
+            updated.lastWeekCaseRate = Double(mostRecentWeekTotal * 100_000) / Double(population)
+            return updated
+        }
+        return updatedAreas.sorted { lhs, rhs in
+            lhs.lastWeekCaseRate! > rhs.lastWeekCaseRate!
+        }
+    }
+    
     var searchString: String = "" {
         didSet {
             updateResults()
@@ -223,16 +250,32 @@ class SearchUseCase : ObservableObject {
         }
     }
     
+    var ages: [String] = [] {
+        didSet {
+            // Could just update case rates as optimisation
+            updateResults()
+        }
+    }
+    
+    
+    private var existingUpdate: Task<(),Never>?
+    
     @objc private func updateResults() {
+        existingUpdate?.cancel()
         let context = container.newBackgroundContext()
         let search = searchString
-        Task {
+        existingUpdate = Task {
             do {
                 let areas = try await context.perform {
                     return try self.fetchAreas(search: search, context: context)
 //                        await self.updateAreas(areas: areas)
                 }
                 await updateAreas(areas: areas)
+                guard !ages.isEmpty else { return }
+                let areasWithCases = try await context.perform {
+                    return try self.fetchCases(areas: areas, context: context)
+                }
+                await updateAreas(areas: areasWithCases)
             } catch {
                 fatalError(error.localizedDescription)
             }
