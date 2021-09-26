@@ -41,7 +41,7 @@ struct ContentView: View {
     }()
     
     @State private var viewModelWhileLoading: CovidDataGroupViewModel?
-    @State private var showAreas = true
+    @State private var showAreas = false
     @State private var showAges = false
     
     @State private var currentAreaName: String = ""
