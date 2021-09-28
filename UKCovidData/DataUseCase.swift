@@ -268,7 +268,7 @@ class SearchUseCase : ObservableObject {
     }
     
     @MainActor
-    private func updateGrowthStats(stats: DistributionStats, date: String) {
+    private func updateGrowthStats(stats: DistributionStats?, date: String?) {
         self.growthStats = stats
         self.lastDate = date
     }
@@ -343,8 +343,8 @@ class SearchUseCase : ObservableObject {
         existingUpdate?.cancel()
         let context = container.newBackgroundContext()
         let search = searchString
-        growthStats = nil
         existingUpdate = Task {
+            await updateGrowthStats(stats: nil, date: nil)
             do {
                 let areas = try await context.perform {
                     return try self.fetchAreas(search: search, context: context)
@@ -359,7 +359,7 @@ class SearchUseCase : ObservableObject {
                 if let growthStats = DistributionStats(
                     values: areasWithCases.compactMap(\.lastWeekCaseGrowth),
                     bucketBoundaries: [0, 0.20, 0.50, 1.0, 1.5, 2.0, 3]) {
-                    await updateGrowthStats(stats: growthStats, date: date!)
+                    await updateGrowthStats(stats: growthStats, date: date)
                 }
             } catch {
                 fatalError(error.localizedDescription)

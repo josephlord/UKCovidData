@@ -13,7 +13,7 @@ struct UKCovidDataApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AreaListView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .task {
                     do {

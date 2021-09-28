@@ -12,6 +12,8 @@ struct AreaDetailsView : View {
     let area: Area
     @Environment(\.ageOptions) var ageOptions: AgeOptions
     
+    @State var showAges = false
+    
     @StateObject
     var datesUseCase: DateUseCase = {
         let useCase = DateUseCase(
@@ -54,6 +56,18 @@ struct AreaDetailsView : View {
                 .navigationViewStyle(StackNavigationViewStyle())
             }
         }
+        .toolbar {
+            ToolbarItem {
+                Button(action: { showAges = true } ) {
+                    Text("Ages")
+                }
+            }
+        }
+        .sheet(
+            isPresented: $showAges,
+            onDismiss: {
+                datesUseCase.ages = ageOptions.selected
+            }) { AgeOptionsView(ageOptions: ageOptions) }
         .onAppear {
             datesUseCase.areas = [area]
             datesUseCase.ages = ageOptions.selected

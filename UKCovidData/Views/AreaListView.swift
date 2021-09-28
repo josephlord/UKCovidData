@@ -26,7 +26,7 @@ extension EnvironmentValues {
     }
 }
 
-struct ContentView: View {
+struct AreaListView: View {
     //@Environment(\.managedObjectContext) private var viewContext
 
     @StateObject
@@ -131,12 +131,12 @@ struct ContentView: View {
                 .navigationBarTitle(searchUseCase.lastDate ?? "")
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem {
                     Button(action: { showAges = true } ) {
                         Text("Ages")
                     }
                 }
-                ToolbarItem {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: update) {
                         Label("Update", systemImage: "square.and.arrow.down.on.square")
                     }.disabled(isLoading)
@@ -149,34 +149,7 @@ struct ContentView: View {
                 isPresented: $showAges,
                 onDismiss: {
                     searchUseCase.ages = ageOptions.selected
-                }) {
-                    VStack {
-                        HStack {
-                            Button(action: {
-                                ageOptions.setAll(enabled: true)
-                            }, label: { Text("Enable All") })
-                                .padding()
-                                .border(Color.accentColor)
-                            Spacer()
-                            Button(action: {
-                                ageOptions.setAll(enabled: false)
-                            }, label: { Text("Disable All") })
-                                .padding()
-                                .border(Color.accentColor)
-                        }.padding()
-                        List() {
-                            
-                            ForEach($ageOptions.options.indices, id: \.self) { index in
-                                Toggle(
-                                    isOn: $ageOptions.options[index].isEnabled,
-                                    label: {
-                                        Text(ageOptions.options[index].age)
-                                    }
-                                )
-                            }
-                        }
-                    }
-            }
+                }) { AgeOptionsView(ageOptions: ageOptions) }
         
         }
         .environment(\.ageOptions, ageOptions)
@@ -237,7 +210,7 @@ class AgeOptions : ObservableObject {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        AreaListView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }
 
