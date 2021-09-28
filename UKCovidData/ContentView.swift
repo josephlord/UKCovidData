@@ -87,7 +87,7 @@ struct ContentView: View {
             .popover(isPresented: $showAreas) {
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
                     .padding()
-                    .border(Color.blue)
+                    .border(Color.accentColor)
                     .padding()
                     
                 List() {
@@ -120,13 +120,13 @@ struct ContentView: View {
                                 ageOptions.setAll(enabled: true)
                             }, label: { Text("Enable All") })
                                 .padding()
-                                .border(Color.blue)
+                                .border(Color.accentColor)
                             Spacer()
                             Button(action: {
                                 ageOptions.setAll(enabled: false)
                             }, label: { Text("Disable All") })
                                 .padding()
-                                .border(Color.blue)
+                                .border(Color.accentColor)
                         }.padding()
                         List() {
                             
