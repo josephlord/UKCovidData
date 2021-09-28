@@ -40,6 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BF382E1227031BDE008213E6 /* UKCovidData.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UKCovidData.entitlements; sourceTree = "<group>"; };
 		BF47343526F7EC0700E0B866 /* DataUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUseCase.swift; sourceTree = "<group>"; };
 		BF6A8DD426F2541A0084DF96 /* UKCovidData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UKCovidData.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UKCovidDataApp.swift; sourceTree = "<group>"; };
@@ -106,6 +107,7 @@
 		BF6A8DD626F2541A0084DF96 /* UKCovidData */ = {
 			isa = PBXGroup;
 			children = (
+				BF382E1227031BDE008213E6 /* UKCovidData.entitlements */,
 				BF6A8E0826F262520084DF96 /* Data */,
 				BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */,
 				BF6A8DD926F2541A0084DF96 /* ContentView.swift */,
@@ -452,6 +454,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = UKCovidData/UKCovidData.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"UKCovidData/Preview Content\"";
@@ -471,6 +474,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = uk.me.jtl.UKCovidData;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -482,6 +486,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = UKCovidData/UKCovidData.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"UKCovidData/Preview Content\"";
@@ -501,6 +506,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = uk.me.jtl.UKCovidData;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

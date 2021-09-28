@@ -81,6 +81,7 @@ struct ContentView: View {
                         }
                     }
                     .navigationTitle(currentAreaName)
+                    .navigationViewStyle(StackNavigationViewStyle())
                 }
             }
             
@@ -102,7 +103,7 @@ struct ContentView: View {
                                 Spacer()
                                 Text(area.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
                                 Color.clear.frame(width: 12)
-                                Text(area.lastWeekCaseGrowth.flatMap { rateFormatter.string(for: $0 * 100) } ?? "-")
+                                Text((area.lastWeekCaseGrowth.flatMap { rateFormatter.string(for: $0 * 100) } ?? "-") + "%")
                             }
                         }
                     }
@@ -173,6 +174,7 @@ struct ContentView: View {
             }
             isLoading = false
             viewModelWhileLoading = nil
+            searchUseCase.searchString = searchUseCase.searchString
         }
     }
 }
