@@ -332,8 +332,10 @@ class SearchUseCase : ObservableObject {
     
     var ages: [String] = [] {
         didSet {
-            // Could just update case rates as optimisation
-            updateResults()
+            if ages != oldValue {
+                // Could just update case rates as optimisation
+                updateResults()
+            }
         }
     }
     

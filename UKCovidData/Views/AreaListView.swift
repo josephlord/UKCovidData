@@ -90,6 +90,7 @@ struct AreaListView: View {
     @State private var showAges = false
     
     @StateObject var ageOptions = AgeOptions()
+    @State private var navigation: String?
 
     var body: some View {
         NavigationView {
@@ -122,7 +123,7 @@ struct AreaListView: View {
                 .font(Font.headline)
                 List() {
                     ForEach(areas) { area in
-                        NavigationLink(destination: AreaDetailsView(area: area)) {
+                        NavigationLink(destination: AreaDetailsView(area: area), tag: area.name, selection: $navigation) {
                             HStack {
                                 Text(area.name)
                                 Spacer()
@@ -152,8 +153,12 @@ struct AreaListView: View {
                 }
             }
             .onAppear {
+                searchUseCase.ages = ageOptions.selected
+                
                 cancellable = ageOptions.$options.sink { (values: [AgeOption]) in
-                    searchUseCase.ages = values.filter { $0.isEnabled }.map { $0.age }
+                    if navigation == nil {
+                        searchUseCase.ages = values.filter { $0.isEnabled }.map { $0.age }
+                    }
                 }
             }
         }
