@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF382E1427033F78008213E6 /* AreaDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF382E1327033F78008213E6 /* AreaDetailsView.swift */; };
 		BF47343626F7EC0700E0B866 /* DataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF47343526F7EC0700E0B866 /* DataUseCase.swift */; };
 		BF6A8DD826F2541A0084DF96 /* UKCovidDataApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */; };
 		BF6A8DDA26F2541A0084DF96 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DD926F2541A0084DF96 /* ContentView.swift */; };
@@ -41,6 +42,7 @@
 
 /* Begin PBXFileReference section */
 		BF382E1227031BDE008213E6 /* UKCovidData.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UKCovidData.entitlements; sourceTree = "<group>"; };
+		BF382E1327033F78008213E6 /* AreaDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaDetailsView.swift; sourceTree = "<group>"; };
 		BF47343526F7EC0700E0B866 /* DataUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUseCase.swift; sourceTree = "<group>"; };
 		BF6A8DD426F2541A0084DF96 /* UKCovidData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UKCovidData.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UKCovidDataApp.swift; sourceTree = "<group>"; };
@@ -117,6 +119,7 @@
 				BF6A8DDD26F2541C0084DF96 /* Preview Content */,
 				BF6A8E0626F262100084DF96 /* DataUpdater.swift */,
 				BF47343526F7EC0700E0B866 /* DataUseCase.swift */,
+				BF382E1327033F78008213E6 /* AreaDetailsView.swift */,
 			);
 			path = UKCovidData;
 			sourceTree = "<group>";
@@ -294,6 +297,7 @@
 				BF6A8DE126F2541C0084DF96 /* Persistence.swift in Sources */,
 				BF6A8DDA26F2541A0084DF96 /* ContentView.swift in Sources */,
 				BF6A8DD826F2541A0084DF96 /* UKCovidDataApp.swift in Sources */,
+				BF382E1427033F78008213E6 /* AreaDetailsView.swift in Sources */,
 				BF47343626F7EC0700E0B866 /* DataUseCase.swift in Sources */,
 				BF6A8DE426F2541C0084DF96 /* UKCovidData.xcdatamodeld in Sources */,
 				BF6A8E0726F262100084DF96 /* DataUpdater.swift in Sources */,

@@ -197,7 +197,7 @@ struct DistributionStats {
     }
     
     init?(values: [Double], bucketBoundaries: [Double]) {
-        guard !values.isEmpty else { return nil }
+        guard values.count > 5 else { return nil }
         let sorted = values.sorted()
         min = sorted.first!
         max = sorted.last!
