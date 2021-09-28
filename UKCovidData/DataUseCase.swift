@@ -213,7 +213,6 @@ struct DistributionStats {
         topQuintileLower = quintileBoundaries[3]
         median = Self.groupBoundaries(sorted: sorted, numberOfGroups: 2)[0]
         bucketCounts = Self.bucketCounts(sorted: sorted, boundaries: bucketBoundaries)
-        print(self)
     }
     
     private static func bucketCounts(sorted: [Double], boundaries: [Double]) -> [(Group, Int16)] {
@@ -330,10 +329,6 @@ class SearchUseCase : ObservableObject {
     var searchString: String = "" {
         didSet {
             updateResults()
-//            guard !searchString.isEmpty else {
-//                areas = []
-//                return
-//            }
         }
     }
     

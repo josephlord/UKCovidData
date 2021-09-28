@@ -48,11 +48,23 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack {
+                Text(ageOptions.selectedAgesString)
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
                     .padding()
                     .border(Color.accentColor)
                     .padding()
                     
+                HStack {
+                    // Do properly with alignment guides
+                    Text("Area")
+                    Spacer()
+                    Text("Last week cases / 100,000")
+                        .frame(width: 90)
+                    Text("%age growth in last week")
+                        .frame(width: 80)
+                }
+                .padding(EdgeInsets(top: 0, leading: 8, bottom: 2, trailing: 4))
+                .font(Font.headline)
                 List() {
                     ForEach(searchUseCase.areas) { area in
                         NavigationLink(destination: AreaDetailsView(area: area)) {
@@ -60,8 +72,11 @@ struct ContentView: View {
                                 Text(area.name)
                                 Spacer()
                                 Text(area.lastWeekCaseRate.flatMap(rateFormatter.string) ?? "-")
-                                Color.clear.frame(width: 12)
-                                Text((area.lastWeekCaseGrowth.flatMap { rateFormatter.string(for: $0 * 100) } ?? "-") + "%")
+//                                Color.clear.fram    e(width: 12)
+                                HStack {
+                                    Spacer()
+                                    Text((area.lastWeekCaseGrowth.flatMap { rateFormatter.string(for: $0 * 100) } ?? "-") + "%")
+                                }.frame(width: 58)
                             }
                         }
                     }
