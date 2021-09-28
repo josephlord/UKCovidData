@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-import CoreData
+//import CoreData
+import Combine
 
 let rateFormatter: NumberFormatter = {
     let f = NumberFormatter()
@@ -45,16 +46,21 @@ struct AreaListView: View {
     
     @State var sortOrder = SortOrder(column: .rate)
     
+    @State var cancellable: Cancellable?
+    
     func tappedSort(column: SortOrder.SortColumn) {
-        if column == sortOrder.column {
-            sortOrder.reverse.toggle()
-        } else {
-            sortOrder.column = column
-            if column == .name {
-                sortOrder.reverse = false
+        withAnimation(.easeInOut(duration: 3)) {
+            if column == sortOrder.column {
+                sortOrder.reverse.toggle()
+            } else {
+                sortOrder.column = column
+                if column == .name {
+                    sortOrder.reverse = false
+                }
             }
         }
     }
+    
     
     var areas: [Area] {
         switch sortOrder.column {
@@ -89,6 +95,9 @@ struct AreaListView: View {
         NavigationView {
             VStack {
                 Text(ageOptions.selectedAgesString)
+                if showAges {
+                    AgeOptionsView(ageOptions: ageOptions)
+                }
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
                     .padding()
                     .border(Color.accentColor)
@@ -132,7 +141,7 @@ struct AreaListView: View {
             }
             .toolbar {
                 ToolbarItem {
-                    Button(action: { showAges = true } ) {
+                    Button(action: { withAnimation { showAges.toggle() } } ) {
                         Text("Ages")
                     }
                 }
@@ -143,14 +152,10 @@ struct AreaListView: View {
                 }
             }
             .onAppear {
-                searchUseCase.ages = ageOptions.selected
+                cancellable = ageOptions.$options.sink { (values: [AgeOption]) in
+                    searchUseCase.ages = values.filter { $0.isEnabled }.map { $0.age }
+                }
             }
-            .sheet(
-                isPresented: $showAges,
-                onDismiss: {
-                    searchUseCase.ages = ageOptions.selected
-                }) { AgeOptionsView(ageOptions: ageOptions) }
-        
         }
         .environment(\.ageOptions, ageOptions)
     }

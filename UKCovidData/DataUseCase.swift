@@ -252,6 +252,7 @@ class SearchUseCase : ObservableObject {
     @Published var areas: [Area] = []
     @Published var growthStats: DistributionStats?
     @Published var lastDate: String?
+//    let ageOptions = AgeOptions()
     private let container: NSPersistentContainer
     
     init(container: NSPersistentContainer) {

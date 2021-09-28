@@ -25,8 +25,8 @@ struct AgeOptionsView: View {
                     .padding()
                     .border(Color.accentColor)
             }.padding()
-            List() {
-                
+//            List() {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80, maximum: 120))]) {
                 ForEach($ageOptions.options.indices, id: \.self) { index in
                     Toggle(
                         isOn: $ageOptions.options[index].isEnabled,
@@ -35,6 +35,7 @@ struct AgeOptionsView: View {
                         }
                     )
                 }
+                .toggleStyle(.button)
             }
         }
     }
