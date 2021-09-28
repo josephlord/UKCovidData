@@ -10,8 +10,8 @@ import CoreData
 
 let rateFormatter: NumberFormatter = {
     let f = NumberFormatter()
-    f.maximumFractionDigits = 1
-    f.minimumFractionDigits = 1
+    f.maximumFractionDigits = 0
+    f.minimumFractionDigits = 0
     return f
 }()
 
@@ -56,11 +56,6 @@ struct ContentView: View {
                 List() {
                     ForEach(searchUseCase.areas) { area in
                         NavigationLink(destination: AreaDetailsView(area: area)) {
-    //                    Button(action: {
-    //                        datesUseCase.areas = [area]
-    //                        showAreas = false
-    //                        currentAreaName = area.name
-    //                    }) {
                             HStack {
                                 Text(area.name)
                                 Spacer()
@@ -71,14 +66,11 @@ struct ContentView: View {
                         }
                     }
                     
-                }.listStyle(.plain)
+                }
+                .listStyle(.plain)
+                .navigationBarTitle(searchUseCase.lastDate ?? "")
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { showAreas = true } ) {
-                        Text("Areas")
-                    }
-                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showAges = true } ) {
                         Text("Ages")
@@ -90,7 +82,6 @@ struct ContentView: View {
                     }.disabled(isLoading)
                 }
             }
-            
             .onAppear {
                 searchUseCase.ages = ageOptions.selected
             }

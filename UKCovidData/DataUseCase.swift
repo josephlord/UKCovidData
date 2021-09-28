@@ -62,7 +62,30 @@ struct AreaAgeCasesEntity : Sendable {
 
 class DateUseCase : ObservableObject {
     @Published var viewModel: CovidDataGroupViewModel
-    private let fetchedResultsController: NSFetchedResultsController<AreaAgeDateCases>
+    private let context: NSManagedObjectContext
+    
+    private lazy var fetchedResultsController: NSFetchedResultsController<AreaAgeDateCases> = {
+        let request = AreaAgeDateCases.fetchRequest()
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: true),
+            NSSortDescriptor(keyPath: \AreaAgeDateCases.areaCode, ascending: false),
+            NSSortDescriptor(keyPath: \AreaAgeDateCases.age, ascending: false)
+        ]
+        let fetchedResultsController = NSFetchedResultsController(
+            fetchRequest: request,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil)
+        Task {
+            var model = CovidDataGroupViewModel(areas: areas, ages: ages, cases: [])
+           
+            for try await update in frcSequence {
+                model.cases = combineCases(entites: update, population: groupPopulation)
+                await updatePublished(newValue: model)
+            }
+        }
+        return fetchedResultsController
+    }()
     
     @Published var areas: [Area] = [] {
         didSet {
@@ -106,26 +129,7 @@ class DateUseCase : ObservableObject {
     
     init(context: NSManagedObjectContext) {
         viewModel = CovidDataGroupViewModel()
-   
-        let request = AreaAgeDateCases.fetchRequest()
-        request.sortDescriptors = [
-            NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: true),
-            NSSortDescriptor(keyPath: \AreaAgeDateCases.areaCode, ascending: false),
-            NSSortDescriptor(keyPath: \AreaAgeDateCases.age, ascending: false)
-        ]
-        fetchedResultsController = .init(
-            fetchRequest: request,
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil)
-        Task {
-            var model = CovidDataGroupViewModel(areas: areas, ages: ages, cases: [])
-           
-            for try await update in frcSequence {
-                model.cases = combineCases(entites: update, population: groupPopulation)
-                await updatePublished(newValue: model)
-            }
-        }
+        self.context = context
     }
     
     func combineCases(entites: [AreaAgeCasesEntity], population: Int) -> [DateCaseValue] {
@@ -248,6 +252,7 @@ struct DistributionStats {
 class SearchUseCase : ObservableObject {
     @Published var areas: [Area] = []
     @Published var growthStats: DistributionStats?
+    @Published var lastDate: String?
     private let container: NSPersistentContainer
     
     init(container: NSPersistentContainer) {
@@ -264,8 +269,9 @@ class SearchUseCase : ObservableObject {
     }
     
     @MainActor
-    private func updateGrowthStats(stats: DistributionStats) {
+    private func updateGrowthStats(stats: DistributionStats, date: String) {
         self.growthStats = stats
+        self.lastDate = date
     }
     
     fileprivate func fetchAreas(search: String, context: NSManagedObjectContext) throws -> [Area] {
@@ -293,18 +299,20 @@ class SearchUseCase : ObservableObject {
         return areas
     }
     
-    fileprivate func fetchCases(areas: [Area], context: NSManagedObjectContext) throws -> [Area] {
+    fileprivate func fetchCases(areas: [Area], context: NSManagedObjectContext) throws -> ([Area], date: String?) {
         let weekRecordsCount = ages.count * 7
         let fetchRequest = AreaAgeDateCases.fetchRequest()
         fetchRequest.fetchLimit = weekRecordsCount * 2 // Last two week's data
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \AreaAgeDateCases.date, ascending: false)]
         let agesPredicate = NSPredicate(format: "age in %@", ages)
+        var date: String? = nil
         let updatedAreas: [Area] = try areas.map { originalArea in
             var updated = originalArea
             let areaPredicate = NSPredicate(format: "areaCode = %@", originalArea.id)
             fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [areaPredicate, agesPredicate])
             let areaCases = try fetchRequest.execute()
             assert(areaCases.count == fetchRequest.fetchLimit)
+            date = areaCases.first!.date 
             let mostRecentWeekTotal = areaCases.prefix(weekRecordsCount).reduce(0) { $0 + $1.cases }
             let previousWeekTotal = areaCases.suffix(weekRecordsCount).reduce(0) { $0 + $1.cases }
             updated.lastWeekCaseGrowth = previousWeekTotal > 0 ? Double(mostRecentWeekTotal - previousWeekTotal) / Double(previousWeekTotal) : (mostRecentWeekTotal > 0 ? Double.infinity : 0)
@@ -313,9 +321,10 @@ class SearchUseCase : ObservableObject {
             updated.lastWeekCaseRate = Double(mostRecentWeekTotal * 100_000) / Double(population)
             return updated
         }
-        return updatedAreas.sorted { lhs, rhs in
+        let areasSortedByCaseRate = updatedAreas.sorted { lhs, rhs in
             lhs.lastWeekCaseRate! > rhs.lastWeekCaseRate!
         }
+        return (areasSortedByCaseRate, date)
     }
     
     var searchString: String = "" {
@@ -351,14 +360,14 @@ class SearchUseCase : ObservableObject {
                 }
                 await updateAreas(areas: areas)
                 guard !ages.isEmpty else { return }
-                let areasWithCases = try await context.perform {
+                let (areasWithCases, date) = try await context.perform {
                     return try self.fetchCases(areas: areas, context: context)
                 }
                 await updateAreas(areas: areasWithCases)
                 if let growthStats = DistributionStats(
                     values: areasWithCases.compactMap(\.lastWeekCaseGrowth),
                     bucketBoundaries: [0, 0.20, 0.50, 1.0, 1.5, 2.0, 3]) {
-                    await updateGrowthStats(stats: growthStats)
+                    await updateGrowthStats(stats: growthStats, date: date!)
                 }
             } catch {
                 fatalError(error.localizedDescription)
