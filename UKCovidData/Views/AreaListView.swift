@@ -6,35 +6,25 @@
 //
 
 import SwiftUI
-//import CoreData
 import Combine
 
-let rateFormatter: NumberFormatter = {
-    let f = NumberFormatter()
-    f.maximumFractionDigits = 0
-    f.minimumFractionDigits = 0
-    return f
-}()
-
-struct AgeOptionsKey : EnvironmentKey {
-    static var defaultValue: AgeOptions = AgeOptions()
-}
-
-extension EnvironmentValues {
-    var ageOptions: AgeOptions {
-        get { self[AgeOptionsKey.self] }
-        set { self[AgeOptionsKey.self] = newValue }
-    }
-}
-
 struct AreaListView: View {
-    //@Environment(\.managedObjectContext) private var viewContext
 
     @StateObject
     var searchUseCase: SearchUseCase = {
         let useCase = SearchUseCase(container: PersistenceController.shared.container)
         return useCase
     }()
+    @StateObject var ageOptions = AgeOptions()
+    
+    @State private var isLoading: Bool = false
+    @State private var viewModelWhileLoading: CovidDataGroupViewModel?
+    @State private var showAreas = false
+    @State private var showAges = false
+    @State private var navigation: String?
+    @State var sortOrder = SortOrder(column: .rate)
+    
+    @State var cancellable: Cancellable?
     
     struct SortOrder {
         enum SortColumn {
@@ -43,24 +33,6 @@ struct AreaListView: View {
         var column: SortColumn
         var reverse: Bool = false
     }
-    
-    @State var sortOrder = SortOrder(column: .rate)
-    
-    @State var cancellable: Cancellable?
-    
-    func tappedSort(column: SortOrder.SortColumn) {
-        withAnimation(.easeInOut(duration: 3)) {
-            if column == sortOrder.column {
-                sortOrder.reverse.toggle()
-            } else {
-                sortOrder.column = column
-                if column == .name {
-                    sortOrder.reverse = false
-                }
-            }
-        }
-    }
-    
     
     var areas: [Area] {
         switch sortOrder.column {
@@ -83,14 +55,31 @@ struct AreaListView: View {
         }
     }
     
-    @State private var isLoading: Bool = false
+    func tappedSort(column: SortOrder.SortColumn) {
+        withAnimation(.easeInOut(duration: 3)) {
+            if column == sortOrder.column {
+                sortOrder.reverse.toggle()
+            } else {
+                sortOrder.column = column
+                if column == .name {
+                    sortOrder.reverse = false
+                }
+            }
+        }
+    }
     
-    @State private var viewModelWhileLoading: CovidDataGroupViewModel?
-    @State private var showAreas = false
-    @State private var showAges = false
-    
-    @StateObject var ageOptions = AgeOptions()
-    @State private var navigation: String?
+    private func update() {
+        isLoading = true
+        Task {
+            do {
+                try await updateCases()
+            } catch {
+                print(error)
+            }
+            isLoading = false
+            searchUseCase.searchString = searchUseCase.searchString
+        }
+    }
 
     var body: some View {
         NavigationView {
@@ -164,72 +153,10 @@ struct AreaListView: View {
         }
         .environment(\.ageOptions, ageOptions)
     }
-    
-    private func update() {
-        isLoading = true
-        Task {
-            do {
-                try await updateCases()
-            } catch {
-                print(error)
-            }
-            isLoading = false
-            searchUseCase.searchString = searchUseCase.searchString
-        }
-    }
-}
-
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
-struct AgeOption : Identifiable, Equatable {
-    let age: String
-    var isEnabled: Bool
-    var id: String { age }
-    
-    fileprivate static let initialAgeSelection = "10_14"
-    
-    static private let ages = ["00_04", "05_09", "10_14", "15_19", "20_24", "25_29", "30_34", "35_39", "40_44",
-                      "45_49", "50_54", "55_59", "60_64", "65_69", "70_74", "75_79", "80_84", "85_89", "90+"]
-    static var ageOptions = ages.map { AgeOption(age: $0, isEnabled: $0 == initialAgeSelection) }
-}
-
-class AgeOptions : ObservableObject {
-    @Published var options = AgeOption.ageOptions
-    
-    func setAll(enabled: Bool) {
-        var tmp = options
-        tmp.indices.forEach {
-            tmp[$0].isEnabled = enabled
-        }
-        options = tmp
-    }
-    
-    var selected: [String] {
-        options.filter { $0.isEnabled }.map { $0.age }
-    }
-    
-    var selectedAgesString: String {
-        selected.joined(separator: ", ")
-    }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         AreaListView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-    }
-}
-
-extension Collection {
-    func sorted(reverse: Bool, by areInIncreasingOrder: (Element, Element) throws -> Bool) rethrows -> [Element] {
-        if reverse {
-            return try sorted { lhs, rhs in try areInIncreasingOrder(rhs, lhs) }
-        } else {
-            return try sorted(by: areInIncreasingOrder)
-        }
     }
 }

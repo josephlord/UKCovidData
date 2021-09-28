@@ -14,6 +14,9 @@
 		BF382E1F2703DD06008213E6 /* SearchUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF382E1E2703DD06008213E6 /* SearchUseCase.swift */; };
 		BF382E212703DD6A008213E6 /* DistributionStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF382E202703DD6A008213E6 /* DistributionStats.swift */; };
 		BF382E242703DF20008213E6 /* FRCAsyncSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF382E232703DF20008213E6 /* FRCAsyncSequence.swift */; };
+		BF382E262703DFC7008213E6 /* AgeOptionsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF382E252703DFC7008213E6 /* AgeOptionsUseCase.swift */; };
+		BF382E282703E035008213E6 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF382E272703E035008213E6 /* Formatters.swift */; };
+		BF382E2A2703E114008213E6 /* CollectionExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF382E292703E114008213E6 /* CollectionExtensions.swift */; };
 		BF47343626F7EC0700E0B866 /* DataUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF47343526F7EC0700E0B866 /* DataUseCase.swift */; };
 		BF6A8DD826F2541A0084DF96 /* UKCovidDataApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */; };
 		BF6A8DDA26F2541A0084DF96 /* AreaListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DD926F2541A0084DF96 /* AreaListView.swift */; };
@@ -55,6 +58,9 @@
 		BF382E1E2703DD06008213E6 /* SearchUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchUseCase.swift; sourceTree = "<group>"; };
 		BF382E202703DD6A008213E6 /* DistributionStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributionStats.swift; sourceTree = "<group>"; };
 		BF382E232703DF20008213E6 /* FRCAsyncSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRCAsyncSequence.swift; sourceTree = "<group>"; };
+		BF382E252703DFC7008213E6 /* AgeOptionsUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgeOptionsUseCase.swift; sourceTree = "<group>"; };
+		BF382E272703E035008213E6 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		BF382E292703E114008213E6 /* CollectionExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtensions.swift; sourceTree = "<group>"; };
 		BF47343526F7EC0700E0B866 /* DataUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUseCase.swift; sourceTree = "<group>"; };
 		BF6A8DD426F2541A0084DF96 /* UKCovidData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UKCovidData.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UKCovidDataApp.swift; sourceTree = "<group>"; };
@@ -111,7 +117,9 @@
 		BF382E182703DC4A008213E6 /* UseCases */ = {
 			isa = PBXGroup;
 			children = (
+				BF47343526F7EC0700E0B866 /* DataUseCase.swift */,
 				BF382E1E2703DD06008213E6 /* SearchUseCase.swift */,
+				BF382E252703DFC7008213E6 /* AgeOptionsUseCase.swift */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -130,6 +138,8 @@
 			isa = PBXGroup;
 			children = (
 				BF382E232703DF20008213E6 /* FRCAsyncSequence.swift */,
+				BF382E272703E035008213E6 /* Formatters.swift */,
+				BF382E292703E114008213E6 /* CollectionExtensions.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -169,7 +179,6 @@
 				BF6A8DE226F2541C0084DF96 /* UKCovidData.xcdatamodeld */,
 				BF6A8DDD26F2541C0084DF96 /* Preview Content */,
 				BF6A8E0626F262100084DF96 /* DataUpdater.swift */,
-				BF47343526F7EC0700E0B866 /* DataUseCase.swift */,
 			);
 			path = UKCovidData;
 			sourceTree = "<group>";
@@ -345,8 +354,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF6A8DE126F2541C0084DF96 /* Persistence.swift in Sources */,
+				BF382E2A2703E114008213E6 /* CollectionExtensions.swift in Sources */,
 				BF6A8DDA26F2541A0084DF96 /* AreaListView.swift in Sources */,
 				BF6A8DD826F2541A0084DF96 /* UKCovidDataApp.swift in Sources */,
+				BF382E282703E035008213E6 /* Formatters.swift in Sources */,
 				BF382E1727038714008213E6 /* AgeOptionsView.swift in Sources */,
 				BF382E1427033F78008213E6 /* AreaDetailsView.swift in Sources */,
 				BF47343626F7EC0700E0B866 /* DataUseCase.swift in Sources */,
@@ -354,6 +365,7 @@
 				BF382E1D2703DCDB008213E6 /* Cases.swift in Sources */,
 				BF382E1F2703DD06008213E6 /* SearchUseCase.swift in Sources */,
 				BF382E212703DD6A008213E6 /* DistributionStats.swift in Sources */,
+				BF382E262703DFC7008213E6 /* AgeOptionsUseCase.swift in Sources */,
 				BF382E1B2703DC93008213E6 /* Area.swift in Sources */,
 				BF6A8E0726F262100084DF96 /* DataUpdater.swift in Sources */,
 				BF382E242703DF20008213E6 /* FRCAsyncSequence.swift in Sources */,
