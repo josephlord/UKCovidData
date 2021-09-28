@@ -35,9 +35,49 @@ struct ContentView: View {
         return useCase
     }()
     
-    @State private var isLoading: Bool = false
+    struct SortOrder {
+        enum SortColumn {
+            case name, rate, growth
+        }
+        var column: SortColumn
+        var reverse: Bool = false
+    }
     
-
+    @State var sortOrder = SortOrder(column: .rate)
+    
+    func tappedSort(column: SortOrder.SortColumn) {
+        if column == sortOrder.column {
+            sortOrder.reverse.toggle()
+        } else {
+            sortOrder.column = column
+            if column == .name {
+                sortOrder.reverse = false
+            }
+        }
+    }
+    
+    var areas: [Area] {
+        switch sortOrder.column {
+        case .name:
+            return searchUseCase.areas.sorted(reverse: sortOrder.reverse) { lhs, rhs in lhs.name < rhs.name }
+        case .rate:
+            return searchUseCase.areas.sorted(reverse: sortOrder.reverse) { lhs, rhs in
+                guard let lRate = lhs.lastWeekCaseRate,
+                      let rRate = rhs.lastWeekCaseRate
+                else { return lhs.name < rhs.name }
+                return lRate > rRate
+            }
+        case .growth:
+            return searchUseCase.areas.sorted(reverse: sortOrder.reverse) { lhs, rhs in
+                guard let lGrowth = lhs.lastWeekCaseGrowth,
+                      let rGrowth = rhs.lastWeekCaseGrowth
+                else { return lhs.name < rhs.name }
+                return lGrowth > rGrowth
+            }
+        }
+    }
+    
+    @State private var isLoading: Bool = false
     
     @State private var viewModelWhileLoading: CovidDataGroupViewModel?
     @State private var showAreas = false
@@ -56,17 +96,23 @@ struct ContentView: View {
                     
                 HStack {
                     // Do properly with alignment guides
-                    Text("Area")
+                    Button(action: { tappedSort(column: .name) }) {
+                        Text("Area")
+                    }
                     Spacer()
-                    Text("Last week cases / 100,000")
+                    Button(action: { tappedSort(column: .rate) }){
+                        Text("Last week cases / 100,000")
+                    }
                         .frame(width: 90)
-                    Text("%age growth in last week")
+                    Button(action: { tappedSort(column: .growth) }) {
+                        Text("%age growth in last week")
+                    }
                         .frame(width: 80)
                 }
                 .padding(EdgeInsets(top: 0, leading: 8, bottom: 2, trailing: 4))
                 .font(Font.headline)
                 List() {
-                    ForEach(searchUseCase.areas) { area in
+                    ForEach(areas) { area in
                         NavigationLink(destination: AreaDetailsView(area: area)) {
                             HStack {
                                 Text(area.name)
@@ -80,7 +126,6 @@ struct ContentView: View {
                             }
                         }
                     }
-                    
                 }
                 .listStyle(.plain)
                 .navigationBarTitle(searchUseCase.lastDate ?? "")
@@ -193,5 +238,15 @@ class AgeOptions : ObservableObject {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    }
+}
+
+extension Collection {
+    func sorted(reverse: Bool, by areInIncreasingOrder: (Element, Element) throws -> Bool) rethrows -> [Element] {
+        if reverse {
+            return try sorted { lhs, rhs in try areInIncreasingOrder(rhs, lhs) }
+        } else {
+            return try sorted(by: areInIncreasingOrder)
+        }
     }
 }

@@ -9,7 +9,7 @@ import Foundation
 import CoreData
 import DequeModule
 
-struct Area : Sendable, Identifiable{
+struct Area : Sendable, Identifiable {
     var name: String
     var id: String
     var populationsForAges: [String: Int32]
@@ -320,10 +320,7 @@ class SearchUseCase : ObservableObject {
             updated.lastWeekCaseRate = Double(mostRecentWeekTotal * 100_000) / Double(population)
             return updated
         }
-        let areasSortedByCaseRate = updatedAreas.sorted { lhs, rhs in
-            lhs.lastWeekCaseRate! > rhs.lastWeekCaseRate!
-        }
-        return (areasSortedByCaseRate, date)
+        return (updatedAreas, date)
     }
     
     var searchString: String = "" {
