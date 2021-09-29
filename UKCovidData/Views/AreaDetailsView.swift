@@ -35,6 +35,26 @@ struct AreaDetailsView : View {
         VStack {
             Text(ageOptions.selectedAgesString)
             ScrollView {
+                
+                HStack {
+                    VStack {
+                        Text("Total cases")
+                        HStack {
+                            VStatView(label: "Cases", value: "\(datesUseCase.casesSince?.casesMar2020.description ?? "-")")
+                            Spacer()
+                            VStatView(label: "%age of pop", value: (datesUseCase.casesSince?.proportionMar2020).flatMap(percentFormatter.string) ?? "-")
+                        }
+                    }
+                    Spacer()
+                    VStack {
+                        Text("Cases Since June")
+                        HStack {
+                            VStatView(label: "Cases", value: "\(datesUseCase.casesSince?.casesJun2021.description ?? "-")")
+                            Spacer()
+                            VStatView(label: "%age of pop", value: (datesUseCase.casesSince?.proportionJun2021).flatMap(percentFormatter.string) ?? "-")
+                        }
+                    }
+                }.padding([.leading, .trailing])
                 LazyVGrid(
                     columns: [.init(.flexible()), .init(.flexible()), .init(.flexible()), .init(.flexible())]) {
                         Text("Date").font(.headline)

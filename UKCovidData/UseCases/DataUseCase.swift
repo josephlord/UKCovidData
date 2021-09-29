@@ -9,8 +9,16 @@ import Foundation
 import CoreData
 import DequeModule
 
+struct CasesSince {
+    var casesMar2020: Int32
+    var casesJun2021: Int32
+    var proportionMar2020: Double
+    var proportionJun2021: Double
+}
+
 class DateUseCase : ObservableObject {
     @Published var viewModel: CovidDataGroupViewModel
+    @Published var casesSince: CasesSince?
     private let context: NSManagedObjectContext
     
     private lazy var fetchedResultsController: NSFetchedResultsController<AreaAgeDateCases> = {
@@ -29,8 +37,14 @@ class DateUseCase : ObservableObject {
             var model = CovidDataGroupViewModel(areas: areas, ages: ages, cases: [])
            
             for try await update in frcSequence {
-                model.cases = combineCases(entites: update, population: groupPopulation)
+                let cases = combineCases(entites: update, population: groupPopulation)
+                model.cases = cases
                 await updatePublished(newValue: model)
+                
+                Task {
+                    let casesSince = casesSince(cases: cases, population: groupPopulation)
+                    await updateCasesSince(newValue: casesSince)
+                }
             }
         }
         return fetchedResultsController
@@ -57,6 +71,7 @@ class DateUseCase : ObservableObject {
     private func updatePredicate() {
         guard !areas.isEmpty, !ages.isEmpty else {
             viewModel = CovidDataGroupViewModel()
+            casesSince = nil
             return
         }
         fetchedResultsController.fetchRequest.predicate = NSPredicate(
@@ -76,12 +91,30 @@ class DateUseCase : ObservableObject {
         }
     }
     
+    private func casesSince(cases: [DateCaseValue], population: Int) -> CasesSince {
+        var caseTotal: Int32 = 0
+        var before1Jun = false
+        var countSinceJun: Int32 = 0
+        for dcv in cases.reversed() {
+            caseTotal += dcv.cases
+            if !before1Jun && dcv.date == "2021-06-01" {
+                before1Jun = true
+                countSinceJun = caseTotal
+            }
+        }
+        return CasesSince(
+            casesMar2020: caseTotal,
+            casesJun2021: countSinceJun,
+            proportionMar2020: Double(caseTotal) / Double(max(1, population)),
+            proportionJun2021: Double(countSinceJun) / Double(max(1, population)))
+    }
+    
     init(context: NSManagedObjectContext) {
         viewModel = CovidDataGroupViewModel()
         self.context = context
     }
     
-    func combineCases(entites: [AreaAgeCasesEntity], population: Int) -> [DateCaseValue] {
+    private func combineCases(entites: [AreaAgeCasesEntity], population: Int) -> [DateCaseValue] {
         guard !entites.isEmpty else { return [] }
         var lastSix: Deque<DateCaseValue> = []
         var output: [DateCaseValue] = []
@@ -102,7 +135,6 @@ class DateUseCase : ObservableObject {
                 lastSix.append(newValue)
                 output.append(newValue)
             }
-            
         }
         
         for entity in entites {
@@ -122,5 +154,10 @@ class DateUseCase : ObservableObject {
     func updatePublished(newValue: CovidDataGroupViewModel) {
         guard !areas.isEmpty, !ages.isEmpty else { return }
         viewModel = newValue
+    }
+    
+    @MainActor
+    func updateCasesSince(newValue: CasesSince?) {
+        casesSince = newValue
     }
 }
