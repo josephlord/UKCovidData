@@ -78,6 +78,7 @@
 		BF6A8DF926F2541C0084DF96 /* UKCovidDataUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UKCovidDataUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		BF6A8E0626F262100084DF96 /* DataUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUpdater.swift; sourceTree = "<group>"; };
 		BF6A8E0B26F262740084DF96 /* ONS-population_2021-08-05.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "ONS-population_2021-08-05.csv"; sourceTree = "<group>"; };
+		BFC1998A270485B5008A0B46 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +171,7 @@
 		BF6A8DD626F2541A0084DF96 /* UKCovidData */ = {
 			isa = PBXGroup;
 			children = (
+				BFC1998A270485B5008A0B46 /* Info.plist */,
 				BF382E222703DEFC008213E6 /* Utilities */,
 				BF382E192703DC6B008213E6 /* ViewModels */,
 				BF382E182703DC4A008213E6 /* UseCases */,
@@ -537,6 +539,7 @@
 				DEVELOPMENT_TEAM = PPUD3Y4398;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UKCovidData/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -569,6 +572,7 @@
 				DEVELOPMENT_TEAM = PPUD3Y4398;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UKCovidData/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
