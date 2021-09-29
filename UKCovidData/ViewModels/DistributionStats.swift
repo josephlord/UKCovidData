@@ -14,21 +14,47 @@ struct DistributionStats {
     var thirdQuintileLower: Double
     var fourthQuintileLower: Double
     var topQuintileLower: Double
-    var bucketCounts: [(Group, Int16)]
-    enum Group : Hashable {
-        case below(Double)
-        case range(Double, Double)
-        case above(Double)
+    var bucketCounts: [BucketCount]
+    
+    struct BucketCount : Identifiable {
+        var group: Group
+        var count: Int16
         
-        init(lower: Double?, upper: Double) {
-            if let lower = lower {
-                self = .range(lower, upper)
-            } else {
-                self = .below(upper)
+        enum Group : Hashable {
+            case below(Double)
+            case range(Double, Double)
+            case above(Double)
+            
+            init(lower: Double?, upper: Double) {
+                if let lower = lower {
+                    self = .range(lower, upper)
+                } else {
+                    self = .below(upper)
+                }
+            }
+            
+            func label(valueFormat: (Double) -> String) -> String {
+                switch self {
+                case .below(let below):
+                    return "Below \(valueFormat(below))"
+                case .range(let from, let to):
+                    return "\(valueFormat(from)) to \(valueFormat(to))"
+                case .above(let above):
+                    return "Above \(valueFormat(above))"
+                }
+            }
+        }
+        var id: String {
+            switch group {
+            case .below:
+                return "b"
+            case .range(let lower, _):
+                return "\(lower)"
+            case .above:
+                return "a"
             }
         }
     }
-    
     init?(values: [Double], bucketBoundaries: [Double]) {
         guard values.count > 5 else { return nil }
         let sorted = values.sorted()
@@ -44,10 +70,10 @@ struct DistributionStats {
         bucketCounts = Self.bucketCounts(sorted: sorted, boundaries: bucketBoundaries)
     }
     
-    private static func bucketCounts(sorted: [Double], boundaries: [Double]) -> [(Group, Int16)] {
+    private static func bucketCounts(sorted: [Double], boundaries: [Double]) -> [BucketCount] {
         guard !boundaries.isEmpty,
               !sorted.isEmpty else { return [] }
-        var result = [(Group, Int16)]()
+        var result = [BucketCount]()
         var previousBoundary: Double? = nil
         var boundaryIterator = boundaries.makeIterator()
         var currentBoundary = boundaryIterator.next()
@@ -55,14 +81,14 @@ struct DistributionStats {
         for value in sorted {
             while let boundary = currentBoundary,
                value >= boundary {
-                result.append((.init(lower: previousBoundary, upper: boundary), count))
+                result.append(.init(group: .init(lower: previousBoundary, upper: boundary), count: count))
                 count = 0
                 previousBoundary = boundary
                 currentBoundary = boundaryIterator.next()
             }
             count += 1
         }
-        result.append(((.above(previousBoundary!), count)))
+        result.append(.init(group: .above(previousBoundary!), count: count))
         return result
     }
     
