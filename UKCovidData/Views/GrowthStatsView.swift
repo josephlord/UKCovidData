@@ -55,7 +55,7 @@ struct GrowthStatsView: View {
                 Spacer()
             }
         }.padding()
-            .navigationTitle("Growth Stats")
+            .navigationTitle("Change since previous week")
             
     }
 }
@@ -177,6 +177,7 @@ struct VStatView : View {
             Text(value)
                 .font(Font.title2)
                 .minimumScaleFactor(0.6)
+                .lineLimit(1)
         }
     }
 }

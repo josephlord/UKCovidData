@@ -106,7 +106,7 @@ struct AreaListView: View {
                         tag: "StatsView",
                         selection: $navigation
                     ) {
-                        Text("Growth Stats")
+                        Text("Change since previous week")
                     }.buttonStyle(.borderedProminent)
                     StatSummaryView(stats: growthStats, format: growthFormat)
                 }.padding([.leading, .trailing])
