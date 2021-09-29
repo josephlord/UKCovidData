@@ -94,8 +94,8 @@ struct DistributionStats {
     }
     
     private static func bucketCounts(sorted: [Double], boundaries: [Double]) -> [BucketCount] {
-        guard !boundaries.isEmpty,
-              !sorted.isEmpty else { return [] }
+        guard boundaries.count > 1,
+              sorted.count > 1 else { return [] }
         var result = [BucketCount]()
         var previousBoundary: Double? = nil
         var boundaryIterator = boundaries.makeIterator()

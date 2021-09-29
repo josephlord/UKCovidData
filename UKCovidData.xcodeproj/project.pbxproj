@@ -30,6 +30,7 @@
 		BF6A8DFA26F2541C0084DF96 /* UKCovidDataUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8DF926F2541C0084DF96 /* UKCovidDataUITestsLaunchTests.swift */; };
 		BF6A8E0726F262100084DF96 /* DataUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8E0626F262100084DF96 /* DataUpdater.swift */; };
 		BF6A8E0C26F262740084DF96 /* ONS-population_2021-08-05.csv in Resources */ = {isa = PBXBuildFile; fileRef = BF6A8E0B26F262740084DF96 /* ONS-population_2021-08-05.csv */; };
+		BFCF536E270495810084B240 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BFCF536D270495810084B240 /* Settings.bundle */; };
 		BFEE758B26FB52610093F107 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = BFEE758A26FB52610093F107 /* DequeModule */; };
 /* End PBXBuildFile section */
 
@@ -78,6 +79,8 @@
 		BF6A8DF926F2541C0084DF96 /* UKCovidDataUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UKCovidDataUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		BF6A8E0626F262100084DF96 /* DataUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUpdater.swift; sourceTree = "<group>"; };
 		BF6A8E0B26F262740084DF96 /* ONS-population_2021-08-05.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "ONS-population_2021-08-05.csv"; sourceTree = "<group>"; };
+		BFCF536B270490A20084B240 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BFCF536D270495810084B240 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,6 +153,7 @@
 		BF6A8DCB26F2541A0084DF96 = {
 			isa = PBXGroup;
 			children = (
+				BFCF536D270495810084B240 /* Settings.bundle */,
 				BF6A8DD626F2541A0084DF96 /* UKCovidData */,
 				BF6A8DEC26F2541C0084DF96 /* UKCovidDataTests */,
 				BF6A8DF626F2541C0084DF96 /* UKCovidDataUITests */,
@@ -178,6 +182,7 @@
 				BF6A8E0826F262520084DF96 /* Data */,
 				BF6A8DD726F2541A0084DF96 /* UKCovidDataApp.swift */,
 				BF6A8DDB26F2541C0084DF96 /* Assets.xcassets */,
+				BFCF536B270490A20084B240 /* Info.plist */,
 				BF6A8DE026F2541C0084DF96 /* Persistence.swift */,
 				BF6A8DE226F2541C0084DF96 /* UKCovidData.xcdatamodeld */,
 				BF6A8DDD26F2541C0084DF96 /* Preview Content */,
@@ -330,6 +335,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF6A8DDF26F2541C0084DF96 /* Preview Assets.xcassets in Resources */,
+				BFCF536E270495810084B240 /* Settings.bundle in Resources */,
 				BF6A8E0C26F262740084DF96 /* ONS-population_2021-08-05.csv in Resources */,
 				BF6A8DDC26F2541C0084DF96 /* Assets.xcassets in Resources */,
 			);
