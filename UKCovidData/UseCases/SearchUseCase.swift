@@ -76,7 +76,7 @@ class SearchUseCase : ObservableObject {
             let previousWeekTotal = areaCases.suffix(weekRecordsCount).reduce(0) { $0 + $1.cases }
             updated.lastWeekCaseGrowth = previousWeekTotal > 0 ? Double(mostRecentWeekTotal - previousWeekTotal) / Double(previousWeekTotal) : (mostRecentWeekTotal > 0 ? Double.infinity : 0)
             let population = originalArea.populationTotal(ages: ages)
-            guard population > 0 else { fatalError() }
+            guard population > 0 else { throw SearchUseCaseError.noPopulationData }
             updated.lastWeekCaseRate = Double(mostRecentWeekTotal * 100_000) / Double(population)
             return updated
         }
@@ -98,6 +98,9 @@ class SearchUseCase : ObservableObject {
         }
     }
     
+    enum SearchUseCaseError : Error {
+        case noPopulationData
+    }
     
     private var existingUpdate: Task<(),Never>?
     

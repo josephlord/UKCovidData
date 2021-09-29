@@ -84,7 +84,10 @@ struct AreaListView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Text(ageOptions.selectedAgesString)
+                Button(action: { withAnimation { showAges.toggle() } } ) {
+                    Text(ageOptions.selectedAgesString)
+                    Image(systemName: showAges ? "chevron.up" : "chevron.down")
+                }
                 if showAges {
                     AgeOptionsView(ageOptions: ageOptions)
                 }
@@ -130,11 +133,11 @@ struct AreaListView: View {
                 .navigationBarTitle(searchUseCase.lastDate ?? "")
             }
             .toolbar {
-                ToolbarItem {
-                    Button(action: { withAnimation { showAges.toggle() } } ) {
-                        Text("Ages")
-                    }
-                }
+//                ToolbarItem {
+//                    Button(action: { withAnimation { showAges.toggle() } } ) {
+//                        Text("Ages")
+//                    }
+//                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: update) {
                         Label("Update", systemImage: "square.and.arrow.down.on.square")

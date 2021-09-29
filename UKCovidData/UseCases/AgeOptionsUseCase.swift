@@ -36,7 +36,8 @@ class AgeOptions : ObservableObject {
     }
     
     var selectedAgesString: String {
-        selected.joined(separator: ", ")
+        guard !selected.isEmpty else { return "No ages selected" }
+        return selected.joined(separator: ", ")
     }
 }
 
