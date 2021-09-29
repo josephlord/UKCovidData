@@ -109,7 +109,7 @@ struct AreaListView: View {
                         Text("Growth Stats")
                     }.buttonStyle(.borderedProminent)
                     StatSummaryView(stats: growthStats, format: growthFormat)
-                }
+                }.padding([.leading, .trailing])
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
                     .padding()
                     .border(Color.accentColor)
@@ -151,14 +151,8 @@ struct AreaListView: View {
                 .listStyle(.plain)
                 .navigationTitle(Text(searchUseCase.lastDate ?? ""))
                 .navigationBarTitleDisplayMode(.inline)
-                //.navigationBarTitle(searchUseCase.lastDate ?? "")
             }
             .toolbar {
-//                ToolbarItem {
-//                    Button(action: { withAnimation { showAges.toggle() } } ) {
-//                        Text("Ages")
-//                    }
-//                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: update) {
                         Label("Update", systemImage: "square.and.arrow.down.on.square")
@@ -175,6 +169,7 @@ struct AreaListView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .environment(\.ageOptions, ageOptions)
     }
 }

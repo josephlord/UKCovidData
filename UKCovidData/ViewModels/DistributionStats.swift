@@ -58,8 +58,8 @@ struct DistributionStats {
     }
     init?(values: [Double], bucketBoundaries: [Double]) {
         let sorted = values.sorted()
-        min = sorted.first!
-        max = sorted.last!
+        min = sorted.first ?? 0
+        max = sorted.last ?? 0
         count = sorted.count
         if values.count > 5 {
             let quintileBoundaries = Self.groupBoundaries(sorted: sorted, numberOfGroups: 5)
