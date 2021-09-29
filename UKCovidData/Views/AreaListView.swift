@@ -89,7 +89,7 @@ struct AreaListView: View {
                     Image(systemName: showAges ? "chevron.up" : "chevron.down")
                 }
                 if showAges {
-                    AgeOptionsView(ageOptions: ageOptions)
+                    AgeOptionsView(ageOptions: ageOptions, showButtons: false)
                 }
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
                     .padding()
@@ -130,7 +130,9 @@ struct AreaListView: View {
                     }
                 }
                 .listStyle(.plain)
-                .navigationBarTitle(searchUseCase.lastDate ?? "")
+                .navigationTitle(Text(searchUseCase.lastDate ?? ""))
+                .navigationBarTitleDisplayMode(.inline)
+                //.navigationBarTitle(searchUseCase.lastDate ?? "")
             }
             .toolbar {
 //                ToolbarItem {

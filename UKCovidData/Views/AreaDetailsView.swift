@@ -67,7 +67,7 @@ struct AreaDetailsView : View {
             isPresented: $showAges,
             onDismiss: {
                 datesUseCase.ages = ageOptions.selected
-            }) { AgeOptionsView(ageOptions: ageOptions) }
+            }) { AgeOptionsView(ageOptions: ageOptions, showButtons: true) }
         .onAppear {
             datesUseCase.areas = [area]
             datesUseCase.ages = ageOptions.selected

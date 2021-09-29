@@ -28,6 +28,16 @@ class SearchUseCase : ObservableObject {
     }
     
     @MainActor
+    private func clearCasesInfo() {
+        self.areas = areas.map {
+            var cleared = $0
+            cleared.lastWeekCaseGrowth = nil
+            cleared.lastWeekCaseRate = nil
+            return cleared
+        }
+    }
+    
+    @MainActor
     private func updateGrowthStats(stats: DistributionStats?, date: String?) {
         self.growthStats = stats
         self.lastDate = date
@@ -109,6 +119,7 @@ class SearchUseCase : ObservableObject {
         let context = container.newBackgroundContext()
         let search = searchString
         existingUpdate = Task {
+            await clearCasesInfo()
             await updateGrowthStats(stats: nil, date: nil)
             do {
                 let areas = try await context.perform {

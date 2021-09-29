@@ -9,24 +9,27 @@ import SwiftUI
 
 struct AgeOptionsView: View {
     @ObservedObject var ageOptions: AgeOptions
+    let showButtons: Bool
     
     var body: some View {
         VStack {
-            HStack {
-                Button(action: {
-                    ageOptions.setAll(enabled: true)
-                }, label: { Text("Enable All") })
-                    .padding()
-                    .border(Color.accentColor)
-                Spacer()
-                Button(action: {
-                    ageOptions.setAll(enabled: false)
-                }, label: { Text("Disable All") })
-                    .padding()
-                    .border(Color.accentColor)
-            }.padding()
+            if showButtons {
+                HStack {
+                    Button(action: {
+                        ageOptions.setAll(enabled: true)
+                    }, label: { Text("Enable All") })
+                        .padding()
+                        .border(Color.accentColor)
+                    Spacer()
+                    Button(action: {
+                        ageOptions.setAll(enabled: false)
+                    }, label: { Text("Disable All") })
+                        .padding()
+                        .border(Color.accentColor)
+                }.padding()
+            }
 //            List() {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80, maximum: 120))]) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 60, maximum: 120))]) {
                 ForEach($ageOptions.options.indices, id: \.self) { index in
                     Toggle(
                         isOn: $ageOptions.options[index].isEnabled,
@@ -44,6 +47,6 @@ struct AgeOptionsView: View {
 struct AgeOptionsView_Previews: PreviewProvider {
     
     static var previews: some View {
-        AgeOptionsView(ageOptions: AgeOptions())
+        AgeOptionsView(ageOptions: AgeOptions(), showButtons: true)
     }
 }
