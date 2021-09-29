@@ -80,6 +80,10 @@ struct AreaListView: View {
             searchUseCase.searchString = searchUseCase.searchString
         }
     }
+    
+    var growthStats: DistributionStats {
+        searchUseCase.growthStats ?? DistributionStats()
+    }
 
     var body: some View {
         NavigationView {
@@ -91,22 +95,20 @@ struct AreaListView: View {
                 if showAges {
                     AgeOptionsView(ageOptions: ageOptions, showButtons: false)
                 }
-                if let growthStats = searchUseCase.growthStats {
-                    Spacer(minLength: 8)
-                    HStack {
-                        NavigationLink(
-                            destination: GrowthStatsView(
-                                heading: ageOptions.selectedAgesString
-                                    + (searchUseCase.searchString.isEmpty ? " - All areas" : " - Selected areas" ),
-                                stats: growthStats,
-                                format: growthFormat),
-                            tag: "StatsView",
-                            selection: $navigation
-                        ) {
-                            Text("Growth Stats")
-                        }.buttonStyle(.borderedProminent)
-                        StatSummaryView(stats: growthStats, format: growthFormat)
-                    }
+                Spacer(minLength: 8)
+                HStack {
+                    NavigationLink(
+                        destination: GrowthStatsView(
+                            heading: ageOptions.selectedAgesString
+                                + (searchUseCase.searchString.isEmpty ? " - All areas" : " - Selected areas" ),
+                            stats: growthStats,
+                            format: growthFormat),
+                        tag: "StatsView",
+                        selection: $navigation
+                    ) {
+                        Text("Growth Stats")
+                    }.buttonStyle(.borderedProminent)
+                    StatSummaryView(stats: growthStats, format: growthFormat)
                 }
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
                     .padding()

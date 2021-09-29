@@ -6,6 +6,7 @@
 //
 
 struct DistributionStats {
+    
     var count: Int
     var median: Double
     var min: Double
@@ -56,18 +57,40 @@ struct DistributionStats {
         }
     }
     init?(values: [Double], bucketBoundaries: [Double]) {
-        guard values.count > 5 else { return nil }
         let sorted = values.sorted()
         min = sorted.first!
         max = sorted.last!
         count = sorted.count
-        let quintileBoundaries = Self.groupBoundaries(sorted: sorted, numberOfGroups: 5)
-        secondQuintileLower = quintileBoundaries[0]
-        thirdQuintileLower = quintileBoundaries[1]
-        fourthQuintileLower = quintileBoundaries[2]
-        topQuintileLower = quintileBoundaries[3]
-        median = Self.groupBoundaries(sorted: sorted, numberOfGroups: 2)[0]
+        if values.count > 5 {
+            let quintileBoundaries = Self.groupBoundaries(sorted: sorted, numberOfGroups: 5)
+            secondQuintileLower = quintileBoundaries[0]
+            thirdQuintileLower = quintileBoundaries[1]
+            fourthQuintileLower = quintileBoundaries[2]
+            topQuintileLower = quintileBoundaries[3]
+        } else {
+            self.secondQuintileLower = 0
+            self.thirdQuintileLower = 0
+            self.fourthQuintileLower = 0
+            self.topQuintileLower = 0
+        }
+        if values.count > 2 {
+            median = Self.groupBoundaries(sorted: sorted, numberOfGroups: 2)[0]
+        } else {
+            median = Double(values.reduce(0, +)) / Double( Swift.max(values.count, 1))
+        }
         bucketCounts = Self.bucketCounts(sorted: sorted, boundaries: bucketBoundaries)
+    }
+    
+    init() {
+        self.count = 0
+        self.median = 0
+        self.min = 0
+        self.max = 0
+        self.secondQuintileLower = 0
+        self.thirdQuintileLower = 0
+        self.fourthQuintileLower = 0
+        self.topQuintileLower = 0
+        self.bucketCounts = []
     }
     
     private static func bucketCounts(sorted: [Double], boundaries: [Double]) -> [BucketCount] {

@@ -37,18 +37,22 @@ struct GrowthStatsView: View {
                 .font(Font.title)
             Spacer()
             StatSummaryView(stats: stats, format: format)
-            ScrollView {
-                Text("Bucket counts")
-                    .font(Font.title)
-                HStack {
-                    BucketsView(stats: stats, format: format)
-                        .font(Font.title3)
+            if stats.count > 9 {
+                ScrollView {
+                    Text("Bucket counts")
+                        .font(Font.title)
+                    HStack {
+                        BucketsView(stats: stats, format: format)
+                            .font(Font.title3)
+                        Spacer()
+                    }
                     Spacer()
+                    Text("Quintiles")
+                        .font(Font.title)
+                    QuintilesView(stats: stats, format: format)
                 }
+            } else {
                 Spacer()
-                Text("Quintiles")
-                    .font(Font.title)
-                QuintilesView(stats: stats, format: format)
             }
         }.padding()
             .navigationTitle("Growth Stats")
