@@ -134,7 +134,10 @@ struct AreaListView: View {
                 .font(Font.headline)
                 List() {
                     ForEach(areas) { area in
-                        NavigationLink(destination: AreaDetailsView(area: area), tag: area.name, selection: $navigation) {
+                        NavigationLink(
+                            destination: AreaDetailsView(area: area, ageOptions: ageOptions),
+                            tag: area.name,
+                            selection: $navigation) {
                             HStack {
                                 Text(area.name)
                                 Spacer()

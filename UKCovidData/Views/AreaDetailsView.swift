@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import Combine
 
 struct AreaDetailsView : View {
     
     let area: Area
-    @Environment(\.ageOptions) var ageOptions: AgeOptions
+    @ObservedObject var ageOptions: AgeOptions
     
     @State var showAges = false
     
@@ -25,15 +26,25 @@ struct AreaDetailsView : View {
         return useCase
     }()
     
-    internal init(area: Area) {
+    @State private var cancellable: Cancellable?
+    
+    internal init(area: Area, ageOptions: AgeOptions) {
         self.area = area
+        self.ageOptions = ageOptions
     }
     
     var currentAreaName: String { area.name }
     
     var body: some View {
         VStack {
-            Text(ageOptions.selectedAgesString)
+            Button(action: { withAnimation { showAges.toggle() } } ) {
+                Text(ageOptions.selectedAgesString)
+                Image(systemName: showAges ? "chevron.up" : "chevron.down")
+            }
+            if showAges {
+                AgeOptionsView(ageOptions: ageOptions, showButtons: false)
+            }
+            Spacer(minLength: 8)
             ScrollView {
                 
                 HStack {
@@ -76,21 +87,11 @@ struct AreaDetailsView : View {
                 .navigationViewStyle(StackNavigationViewStyle())
             }
         }
-        .toolbar {
-            ToolbarItem {
-                Button(action: { showAges = true } ) {
-                    Text("Ages")
-                }
-            }
-        }
-        .sheet(
-            isPresented: $showAges,
-            onDismiss: {
-                datesUseCase.ages = ageOptions.selected
-            }) { AgeOptionsView(ageOptions: ageOptions, showButtons: true) }
         .onAppear {
             datesUseCase.areas = [area]
-            datesUseCase.ages = ageOptions.selected
+            cancellable = ageOptions.$options.sink { (values: [AgeOption]) in
+                datesUseCase.ages = values.filter { $0.isEnabled }.map { $0.age }
+            }
         }
     }
 }

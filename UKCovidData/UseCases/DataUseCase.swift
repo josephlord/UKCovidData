@@ -8,6 +8,7 @@
 import Foundation
 import CoreData
 import DequeModule
+import Combine
 
 struct CasesSince {
     var casesMar2020: Int32
