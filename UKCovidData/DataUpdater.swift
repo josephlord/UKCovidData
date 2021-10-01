@@ -21,7 +21,7 @@ final class DataUpdater {
         forResource: "ONS-population_2021-08-05",
         withExtension: "csv")!
 
-    private static func ltaCasesByAgeRemoteUrl(lastDateHeld: String?) -> URL {
+    private static func ltaCasesByAgeRemoteUrl(lastDateHeld: String?, page: Int8) -> URL {
         let dateFilter = lastDateHeld.map { ";date>\($0)" } ?? ""
         var urlComps = URLComponents(string: "https://api.coronavirus.data.gov.uk/v1/data")!
         urlComps.queryItems = [
@@ -30,7 +30,7 @@ final class DataUpdater {
                 {"date":"date","areaName":"areaName","areaCode":"areaCode","cases":"newCasesBySpecimenDateAgeDemographics"}
                 """),
             .init(name: "filters", value: "areaType=ltla\(dateFilter)"),
-            .init(name: "page", value: "1"),
+            .init(name: "page", value: "\(page)")
         ]
         return urlComps.url!
     //    return URL(string: "https://api.coronavirus.data.gov.uk/v2/data?areaType=ltla&metric=newCasesBySpecimenDateAgeDemographics&format=csv")!
@@ -91,20 +91,27 @@ final class DataUpdater {
         }
     }
 
-
-    var ltaCasesByAgeRemoteUrl: URL {
-        Self.ltaCasesByAgeRemoteUrl(lastDateHeld: newestCasesDate)
+    func updateCases() async throws {
+        var receivedRecords = true
+        var pageNumber: Int8 = 1
+        let latestDataDate = self.newestCasesDate
+        
+        while receivedRecords && pageNumber < 30 {
+            let url = Self.ltaCasesByAgeRemoteUrl(lastDateHeld: latestDataDate, page: pageNumber)
+            print("Requesting page \(pageNumber)")
+            pageNumber += 1
+            receivedRecords = try await updateCases(url: url, isPage1: pageNumber == 1)
+        }
     }
 
-
-    func updateCases(url: URL? = nil, container: NSPersistentContainer = PersistenceController.shared.container) async throws {
-        let requestUrl = url ?? ltaCasesByAgeRemoteUrl
+    fileprivate func updateCases(url: URL, isPage1: Bool, container: NSPersistentContainer = PersistenceController.shared.container) async throws -> Bool {
         let context = container.newBackgroundContext()
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     //    let priorDate = Date.now - 1
-        try await updateCaseData(url: requestUrl, context: context)
+        let didReceiveRecords = try await updateCaseData(url: url, isPage1: isPage1, context: context)
     //    try await clearCaseData(beforeDate: priorDate, context: context)
         try context.save()
+        return didReceiveRecords
     }
 
     //private func clearCaseData(beforeDate: Date, context: NSManagedObjectContext) async throws {
@@ -137,9 +144,9 @@ final class DataUpdater {
     
     private func csvLineToCasesArray(csvString: String) throws -> [CasesStruct] {
         let values = csvString.csvSplit(separator: ",", enclosure: "\"")
-        let date = values[0]
-        let areaName = values[1]
-        let areaCode = values[2]
+        let date = String(values[0])
+        let areaName = String(values[1])
+        let areaCode = String(values[2])
         let ageCases = values[3].split(separator: "{").dropFirst()
         var templateStruct = CasesStruct(date: date, areaName: areaName, areaCode: areaCode, cases: 0, ages: "")
         return ageCases.map {
@@ -177,7 +184,7 @@ final class DataUpdater {
         try context.save()
     }
 
-    private func updateCaseData(url: URL, context: NSManagedObjectContext) async throws {
+    private func updateCaseData(url: URL, isPage1: Bool, context: NSManagedObjectContext) async throws -> Bool {
         var areaCodes = [String: String]()
         var firstLine = true
         var dataItemCount = 0
@@ -217,10 +224,13 @@ final class DataUpdater {
             }
             try context.save()
         }
-        newestCasesDate = firstDate
+        if isPage1 {
+            newestCasesDate = firstDate
+        }
         PersistenceController.shared.resetPersistentContexts()
     //    PersistenceController.shared.container
         print("Data import complete. Count: \(dataItemCount)")
+        return dataItemCount > 0
     }
 
     enum DataUpdateError : Error {
@@ -271,8 +281,8 @@ extension AreaAgeDemographics {
         else { throw DataUpdater.DataUpdateError.unexpectedValueCount }
         guard values[0] == "AGE_ONLY" && values[2] == "ALL" else { return nil } // We are are ignoring gender specific data
         self.init(context: context)
-        areaCode = values[1]
-        age = values[3]
+        areaCode = String(values[1])
+        age = String(values[3])
         self.population = population
     }
 }
@@ -283,8 +293,8 @@ extension String {
     /// using a separator.
     ///
     /// Note: Separator is ignored inside enclosure characters.
-    func csvSplit(separator: String, enclosure: Character = "\"") -> [String] {
-        var values: [String] = []
+    func csvSplit(separator: String, enclosure: Character = "\"") -> [String.SubSequence] {
+        var values: [String.SubSequence] = []
         // Index of the last processed separator
         var lastSeparatorIndex = startIndex
         var isInsideDoubleQuotes = false
@@ -296,13 +306,13 @@ extension String {
             guard index < count - separator.count else {
                 // No more separators
                 // Add remaining characters
-                values.append(String(self[lastSeparatorIndex..<endIndex]))
+                values.append(self[lastSeparatorIndex..<endIndex])
                 break
             }
             let substring = self[substringStartIndex..<substringEndIndex]
 
             if substring == separator && !isInsideDoubleQuotes {
-                let newstr = String(self[lastSeparatorIndex..<substringStartIndex])
+                let newstr = self[lastSeparatorIndex..<substringStartIndex]
                 values.append(newstr)
                 lastSeparatorIndex = substringEndIndex
             } else if self[substringStartIndex] == enclosure {
