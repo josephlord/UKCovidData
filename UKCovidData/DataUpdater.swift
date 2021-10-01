@@ -98,9 +98,9 @@ final class DataUpdater {
         
         while receivedRecords && pageNumber < 30 {
             let url = Self.ltaCasesByAgeRemoteUrl(lastDateHeld: latestDataDate, page: pageNumber)
-            print("Requesting page \(pageNumber)")
-            pageNumber += 1
+            print("Requesting page \(pageNumber)- \(url)")
             receivedRecords = try await updateCases(url: url, isPage1: pageNumber == 1)
+            pageNumber += 1
         }
     }
 
