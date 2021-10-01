@@ -29,7 +29,7 @@ struct AgeOptionsView: View {
                 }.padding()
             }
 //            List() {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 70, maximum: 120))]) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 74, maximum: 120))]) {
                 ForEach($ageOptions.options.indices, id: \.self) { index in
                     Toggle(
                         isOn: $ageOptions.options[index].isEnabled,
