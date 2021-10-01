@@ -45,38 +45,12 @@ final class DataUpdater {
         }
     }
     
-    //private let surreyHeathCasesOnly = URL(string: "https://api.coronavirus.data.gov.uk/v2/data?areaType=ltla&areaCode=E07000214&metric=newCasesBySpecimenDateAgeDemographics&format=csv")!
-
-//    private let ltaCasesByAgeUrlDev = Bundle.main.url(
-//        forResource: "LTLA_case_data_by_age",
-//        withExtension: "csv")!
-
     func updatePopulations(url: URL = populationUrlDev, container: NSPersistentContainer = PersistenceController.shared.container) async throws {
         let context = container.newBackgroundContext()
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-    //    try await clear()
         try await update()
         try context.save()
-        
-    //    func clear() async throws {
-    //        try await context.perform {
-    //            let fr = AreaAgeDemographics.fetchRequest()
-    //            fr.returnsObjectsAsFaults = true
-    //            fr.fetchLimit = 10_000
-    //            var hasMore = true
-    //            while hasMore {
-    //            print("About to delete")
-    //                let results = try fr.execute()
-    //                hasMore = !results.isEmpty
-    //                results.forEach { context.delete($0) }
-    //                print("Deletion done")
-    //                try context.save()
-    //                print("Saved after delete")
-    //            }
-    //            print("Finished deletion")
-    //        }
-    //    }
-        
+
         func update() async throws {
            var firstline = true
             
@@ -95,44 +69,28 @@ final class DataUpdater {
         var receivedRecords = true
         var pageNumber: Int8 = 1
         let latestDataDate = self.newestCasesDate
-        
+        var updatedLatestDate = latestDataDate
         while receivedRecords && pageNumber < 30 {
+            let dateOfFirstRecord: String?
             let url = Self.ltaCasesByAgeRemoteUrl(lastDateHeld: latestDataDate, page: pageNumber)
             print("Requesting page \(pageNumber)- \(url)")
-            receivedRecords = try await updateCases(url: url, isPage1: pageNumber == 1)
+            (receivedRecords, dateOfFirstRecord) = try await updateCases(url: url)
+            if pageNumber == 1 {
+                updatedLatestDate = dateOfFirstRecord
+            }
             pageNumber += 1
         }
+        // If no error thrown we can update the newestCasesDate
+        self.newestCasesDate = updatedLatestDate
     }
 
-    fileprivate func updateCases(url: URL, isPage1: Bool, container: NSPersistentContainer = PersistenceController.shared.container) async throws -> Bool {
+    fileprivate func updateCases(url: URL, container: NSPersistentContainer = PersistenceController.shared.container) async throws -> (Bool, String?) {
         let context = container.newBackgroundContext()
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-    //    let priorDate = Date.now - 1
-        let didReceiveRecords = try await updateCaseData(url: url, isPage1: isPage1, context: context)
-    //    try await clearCaseData(beforeDate: priorDate, context: context)
+        let didReceiveRecords = try await updateCaseData(url: url, context: context)
         try context.save()
         return didReceiveRecords
     }
-
-    //private func clearCaseData(beforeDate: Date, context: NSManagedObjectContext) async throws {
-    //    try await context.perform {
-    //        let fr = AreaAgeDateCases.fetchRequest()
-    //        fr.returnsObjectsAsFaults = true
-    //        fr.predicate = NSPredicate(format: "timestamp < %@", beforeDate as NSDate)
-    //        fr.fetchLimit = 10_000
-    //        var hasMore = true
-    //        while hasMore {
-    //        print("About to delete")
-    //            let results = try fr.execute()
-    //            hasMore = !results.isEmpty
-    //            results.forEach { context.delete($0) }
-    //            print("Deletion done")
-    //            try context.save()
-    //            print("Saved after delete")
-    //        }
-    //        print("Finished deletion")
-    //    }
-    //}
     
     fileprivate struct CasesStruct {
         var date: String
@@ -183,8 +141,13 @@ final class DataUpdater {
         areaCodes = areaCodeTmp
         try context.save()
     }
-
-    private func updateCaseData(url: URL, isPage1: Bool, context: NSManagedObjectContext) async throws -> Bool {
+    
+    /// Request and process the case data from the URL
+    /// - Parameters:
+    ///   - url: URL to request the CSV cases data from
+    ///   - context: Managed object context to write to
+    /// - Returns: Tuple of Bool (true if at least one record was processed and the date value of the first record)
+    private func updateCaseData(url: URL, context: NSManagedObjectContext) async throws -> (Bool, String?) {
         var areaCodes = [String: String]()
         var firstLine = true
         var dataItemCount = 0
@@ -224,13 +187,9 @@ final class DataUpdater {
             }
             try context.save()
         }
-        if isPage1 {
-            newestCasesDate = firstDate
-        }
         PersistenceController.shared.resetPersistentContexts()
-    //    PersistenceController.shared.container
         print("Data import complete. Count: \(dataItemCount)")
-        return dataItemCount > 0
+        return (dataItemCount > 0, firstDate)
     }
 
     enum DataUpdateError : Error {
