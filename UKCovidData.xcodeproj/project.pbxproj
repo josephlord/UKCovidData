@@ -174,6 +174,7 @@
 		BF6A8DD626F2541A0084DF96 /* UKCovidData */ = {
 			isa = PBXGroup;
 			children = (
+				BF6A8E0626F262100084DF96 /* DataUpdater.swift */,
 				BF382E222703DEFC008213E6 /* Utilities */,
 				BF382E192703DC6B008213E6 /* ViewModels */,
 				BF382E182703DC4A008213E6 /* UseCases */,
@@ -186,7 +187,6 @@
 				BF6A8DE026F2541C0084DF96 /* Persistence.swift */,
 				BF6A8DE226F2541C0084DF96 /* UKCovidData.xcdatamodeld */,
 				BF6A8DDD26F2541C0084DF96 /* Preview Content */,
-				BF6A8E0626F262100084DF96 /* DataUpdater.swift */,
 			);
 			path = UKCovidData;
 			sourceTree = "<group>";
