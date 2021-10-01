@@ -21,7 +21,6 @@ struct PersistenceController {
             let newItem = AreaAgeDateCases(context: viewContext)
             newItem.age = "10_14"
             newItem.areaCode = "12345"
-            newItem.areaName = "A borough"
             newItem.areaType = "ltla"
             newItem.date = "2021-10-04"
             newItem.cases = 43

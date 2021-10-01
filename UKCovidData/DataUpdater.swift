@@ -112,11 +112,11 @@ private func batchWriteLinesToCaseData(lines: [String], areaCodes: inout [String
             guard let next = itr.next() else { return true }
             guard let aadc = object as? AreaAgeDateCases else { fatalError() }
             do {
-                try aadc.updateFromCSV(csvString: next)
+                let areaName = try aadc.updateFromCSV(csvString: next)
+                areaCodeTmp[aadc.areaCode!] = areaName
             } catch {
                 fatalError(error.localizedDescription)
             }
-            areaCodeTmp[aadc.areaCode!] = aadc.areaName
             return false
         }
         let result = try context.execute(batchInsert)
@@ -177,7 +177,11 @@ enum DataUpdateError : Error {
 }
 
 extension AreaAgeDateCases {
-   func updateFromCSV(csvString: String) throws {
+    
+    /// Updates the values from the input and returns the name of the area
+    /// - Parameter csvString: CSV line to from downloaded data
+    /// - Returns: Area name
+    func updateFromCSV(csvString: String) throws -> String {
         let values = csvString.split(separator: ",", enclosure: "\"")
         guard values.count > 6 else {
             print(csvString)
@@ -189,10 +193,10 @@ extension AreaAgeDateCases {
         }
         age = String(values[4])
         areaCode = String(values[0])
-        areaName = String(values[1])
         areaType = String(values[2])
         date = String(values[3])
         cases = caseValue
+        return String(values[1])
     }
 }
 
