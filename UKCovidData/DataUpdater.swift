@@ -298,12 +298,13 @@ extension String {
         // Index of the last processed separator
         var lastSeparatorIndex = startIndex
         var isInsideDoubleQuotes = false
+        let separatorCount = separator.count
 
-        for index in 0..<count {
-            let substringStartIndex = self.index(startIndex, offsetBy: index)
-            let substringEndIndex = self.index(substringStartIndex, offsetBy: separator.count)
+        for loopIndex in indices {
+            let substringStartIndex = loopIndex
+            let substringEndIndex = self.index(substringStartIndex, offsetBy: separatorCount)
 
-            guard index < count - separator.count else {
+            guard substringEndIndex < endIndex else {
                 // No more separators
                 // Add remaining characters
                 values.append(self[lastSeparatorIndex..<endIndex])
@@ -311,12 +312,12 @@ extension String {
             }
             let substring = self[substringStartIndex..<substringEndIndex]
 
-            if substring == separator && !isInsideDoubleQuotes {
+            if !isInsideDoubleQuotes && substring == separator  {
                 let newstr = self[lastSeparatorIndex..<substringStartIndex]
                 values.append(newstr)
                 lastSeparatorIndex = substringEndIndex
             } else if self[substringStartIndex] == enclosure {
-                isInsideDoubleQuotes = !isInsideDoubleQuotes
+                isInsideDoubleQuotes.toggle()
             }
         }
         return values
