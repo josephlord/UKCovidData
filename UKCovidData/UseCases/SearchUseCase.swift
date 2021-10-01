@@ -80,7 +80,7 @@ class SearchUseCase : ObservableObject {
             let areaPredicate = NSPredicate(format: "areaCode = %@", originalArea.id)
             fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [areaPredicate, agesPredicate])
             let areaCases = try fetchRequest.execute()
-            assert(areaCases.count == fetchRequest.fetchLimit)
+            //assert(areaCases.count == fetchRequest.fetchLimit)
             date = areaCases.first!.date
             let mostRecentWeekTotal = areaCases.prefix(weekRecordsCount).reduce(0) { $0 + $1.cases }
             let previousWeekTotal = areaCases.suffix(weekRecordsCount).reduce(0) { $0 + $1.cases }
