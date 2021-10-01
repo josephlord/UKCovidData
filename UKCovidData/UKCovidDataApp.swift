@@ -17,7 +17,7 @@ struct UKCovidDataApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .task {
                     do {
-                        try await updatePopulations()
+                        try await DataUpdater.shared.updatePopulations()
                     } catch {
                         fatalError(error.localizedDescription)
                     }

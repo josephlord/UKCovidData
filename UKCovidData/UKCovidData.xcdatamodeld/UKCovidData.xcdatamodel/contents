@@ -3,7 +3,6 @@
     <entity name="AreaAgeDateCases" representedClassName="AreaAgeDateCases" syncable="YES" codeGenerationType="class">
         <attribute name="age" optional="YES" attributeType="String"/>
         <attribute name="areaCode" attributeType="String"/>
-        <attribute name="areaType" attributeType="String"/>
         <attribute name="cases" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="date" attributeType="String"/>
         <uniquenessConstraints>
@@ -38,7 +37,7 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="AreaAgeDateCases" positionX="-63" positionY="-18" width="128" height="104"/>
+        <element name="AreaAgeDateCases" positionX="-63" positionY="-18" width="128" height="89"/>
         <element name="AreaAgeDemographics" positionX="-63" positionY="36" width="128" height="74"/>
         <element name="AreaCodeName" positionX="-63" positionY="36" width="128" height="59"/>
     </elements>

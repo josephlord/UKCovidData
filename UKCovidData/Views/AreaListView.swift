@@ -72,7 +72,7 @@ struct AreaListView: View {
         isLoading = true
         Task {
             do {
-                try await updateCases()
+                try await DataUpdater.shared.updateCases()
             } catch {
                 print(error)
             }
