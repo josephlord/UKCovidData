@@ -81,7 +81,9 @@ final class DataUpdater {
             pageNumber += 1
         }
         // If no error thrown we can update the newestCasesDate
-        self.newestCasesDate = updatedLatestDate
+        if let updatedLatestDate = updatedLatestDate {
+            self.newestCasesDate = updatedLatestDate
+        }
     }
 
     fileprivate func updateCases(url: URL, container: NSPersistentContainer = PersistenceController.shared.container) async throws -> (Bool, String?) {
