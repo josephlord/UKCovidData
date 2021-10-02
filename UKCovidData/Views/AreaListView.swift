@@ -10,6 +10,8 @@ import Combine
 
 struct AreaListView: View {
 
+    private static var hasRequestedDataUpdate = false
+    
     @StateObject
     var searchUseCase: SearchUseCase = {
         let useCase = SearchUseCase(container: PersistenceController.shared.container)
@@ -175,6 +177,10 @@ struct AreaListView: View {
                     if navigation == nil {
                         searchUseCase.ages = values.filter { $0.isEnabled }.map { $0.age }
                     }
+                }
+                if !Self.hasRequestedDataUpdate {
+                    Self.hasRequestedDataUpdate = true
+                    update()
                 }
             }
         }
