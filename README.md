@@ -12,8 +12,8 @@ Feel free to raise issues if anything doesn't work correctly or you can think of
 
  - Graphs and visualisations
  - Additional data sets (either expanding area options or adding other data types such as death statistics)
- - Improve onboarding (explain updating, add progress indicator for initial download etc.)
+ - Improve onboarding (explain updating, ~~add progress indicator for initial download~~ etc.) - *Progress Indicator is DONE*
  - Help tips and usage guide.
- - Automatic updating to latest data on launch
+ - ~~Automatic updating to latest data on launch~~ - *DONE*
  
  This was quick experimental app. The code is not polished and cleaned up, there may be crashes, this was originally written for me but it is now a good enough experience that others may like it too.
