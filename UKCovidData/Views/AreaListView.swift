@@ -10,12 +10,16 @@ import Combine
 
 struct AreaListView: View {
 
+    private static var hasRequestedDataUpdate = false
+    
     @StateObject
     var searchUseCase: SearchUseCase = {
         let useCase = SearchUseCase(container: PersistenceController.shared.container)
         return useCase
     }()
     @StateObject var ageOptions = AgeOptions()
+    
+    @ObservedObject private var updateProgres = DataUpdater.shared.progressPublisher
     
     @State private var isLoading: Bool = false
     @State private var viewModelWhileLoading: CovidDataGroupViewModel?
@@ -88,6 +92,10 @@ struct AreaListView: View {
     var body: some View {
         NavigationView {
             VStack {
+                if let progress = updateProgres.progress {
+                    ProgressView(progress: progress)
+                        .padding()
+                }
                 Button(action: { withAnimation { showAges.toggle() } } ) {
                     Text(ageOptions.selectedAgesString)
                     Image(systemName: showAges ? "chevron.up" : "chevron.down")
@@ -169,6 +177,10 @@ struct AreaListView: View {
                     if navigation == nil {
                         searchUseCase.ages = values.filter { $0.isEnabled }.map { $0.age }
                     }
+                }
+                if !Self.hasRequestedDataUpdate {
+                    Self.hasRequestedDataUpdate = true
+                    update()
                 }
             }
         }

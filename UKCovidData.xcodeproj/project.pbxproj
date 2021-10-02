@@ -31,6 +31,7 @@
 		BF6A8E0726F262100084DF96 /* DataUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6A8E0626F262100084DF96 /* DataUpdater.swift */; };
 		BF6A8E0C26F262740084DF96 /* ONS-population_2021-08-05.csv in Resources */ = {isa = PBXBuildFile; fileRef = BF6A8E0B26F262740084DF96 /* ONS-population_2021-08-05.csv */; };
 		BFCF536E270495810084B240 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BFCF536D270495810084B240 /* Settings.bundle */; };
+		BFCF53702707D83A0084B240 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFCF536F2707D83A0084B240 /* ProgressView.swift */; };
 		BFEE758B26FB52610093F107 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = BFEE758A26FB52610093F107 /* DequeModule */; };
 /* End PBXBuildFile section */
 
@@ -81,6 +82,7 @@
 		BF6A8E0B26F262740084DF96 /* ONS-population_2021-08-05.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "ONS-population_2021-08-05.csv"; sourceTree = "<group>"; };
 		BFCF536B270490A20084B240 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BFCF536D270495810084B240 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		BFCF536F2707D83A0084B240 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +118,7 @@
 				BF6A8DD926F2541A0084DF96 /* AreaListView.swift */,
 				BF382E1627038714008213E6 /* AgeOptionsView.swift */,
 				BF382E2B2703E8D8008213E6 /* GrowthStatsView.swift */,
+				BFCF536F2707D83A0084B240 /* ProgressView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -379,6 +382,7 @@
 				BF382E1B2703DC93008213E6 /* Area.swift in Sources */,
 				BF6A8E0726F262100084DF96 /* DataUpdater.swift in Sources */,
 				BF382E242703DF20008213E6 /* FRCAsyncSequence.swift in Sources */,
+				BFCF53702707D83A0084B240 /* ProgressView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
