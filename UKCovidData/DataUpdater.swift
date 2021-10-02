@@ -7,7 +7,27 @@
 
 import Foundation
 import CoreData
+import Combine
 
+final class ProgressPublisher : ObservableObject {
+    @Published var progress: Progress?
+    
+    struct Progress {
+        var numerator: Double
+        var denominator: Double
+        var unit: String?
+    }
+    
+    @MainActor
+    func update(progress: Progress?) {
+        self.progress = progress
+    }
+    
+    @MainActor
+    func update(completion: Double) {
+        self.progress?.numerator = completion
+    }
+}
 
 final class DataUpdater {
     
@@ -16,6 +36,8 @@ final class DataUpdater {
     }
     
     static var shared = DataUpdater.init()
+    
+    var progressPublisher = ProgressPublisher()
 
     private static let populationUrlDev = Bundle.main.url(
         forResource: "ONS-population_2021-08-05",
@@ -66,10 +88,18 @@ final class DataUpdater {
     }
 
     func updateCases() async throws {
+        defer {
+            Task {
+                await progressPublisher.update(progress: nil)
+            }
+        }
         var receivedRecords = true
         var pageNumber: Int8 = 1
         let latestDataDate = self.newestCasesDate
         var updatedLatestDate = latestDataDate
+        Task {
+            await self.progressPublisher.update(progress: .init(numerator: 0, denominator: 315, unit: nil))
+        }
         while receivedRecords && pageNumber < 30 {
             let dateOfFirstRecord: String?
             let url = Self.ltaCasesByAgeRemoteUrl(lastDateHeld: latestDataDate, page: pageNumber)
@@ -134,7 +164,13 @@ final class DataUpdater {
                 guard let next = itr.next() else { return true }
                 guard let aadc = object as? AreaAgeDateCases else { fatalError() }
                 aadc.updateFromCasesStruct(record: next)
-                areaCodeTmp[next.areaCode] = next.areaName
+                if areaCodeTmp[next.areaCode] == nil {
+                    areaCodeTmp[next.areaCode] = next.areaName
+                    let areaCount = areaCodeTmp.count
+                    Task {
+                        await self.progressPublisher.update(completion: Double(areaCount) - 0.5)
+                    }
+                }
                 return false
             }
             let result = try context.execute(batchInsert)
@@ -149,8 +185,7 @@ final class DataUpdater {
     ///   - url: URL to request the CSV cases data from
     ///   - context: Managed object context to write to
     /// - Returns: Tuple of Bool (true if at least one record was processed and the date value of the first record)
-    private func updateCaseData(url: URL, context: NSManagedObjectContext) async throws -> (Bool, String?) {
-        var areaCodes = [String: String]()
+    private func updateCaseData(url: URL, areaCodes: inout [String: String], context: NSManagedObjectContext) async throws -> (Bool, String?) {
         var firstLine = true
         var dataItemCount = 0
         var linesBatch: [String] = []

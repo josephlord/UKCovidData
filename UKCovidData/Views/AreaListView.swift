@@ -17,6 +17,8 @@ struct AreaListView: View {
     }()
     @StateObject var ageOptions = AgeOptions()
     
+    @ObservedObject private var updateProgres = DataUpdater.shared.progressPublisher
+    
     @State private var isLoading: Bool = false
     @State private var viewModelWhileLoading: CovidDataGroupViewModel?
     @State private var showAreas = false
@@ -88,6 +90,10 @@ struct AreaListView: View {
     var body: some View {
         NavigationView {
             VStack {
+                if let progress = updateProgres.progress {
+                    ProgressView(progress: progress)
+                        .padding()
+                }
                 Button(action: { withAnimation { showAges.toggle() } } ) {
                     Text(ageOptions.selectedAgesString)
                     Image(systemName: showAges ? "chevron.up" : "chevron.down")
