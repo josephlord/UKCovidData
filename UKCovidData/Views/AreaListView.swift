@@ -119,6 +119,7 @@ struct AreaListView: View {
                     StatSummaryView(stats: growthStats, format: growthFormat)
                 }.padding([.leading, .trailing])
                 TextField("Area", text: $searchUseCase.searchString, prompt: Text("Search"))
+                    .disableAutocorrection(true)
                     .padding()
                     .border(Color.accentColor)
                     .padding()
