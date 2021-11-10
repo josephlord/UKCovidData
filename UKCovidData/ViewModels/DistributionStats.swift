@@ -111,7 +111,12 @@ struct DistributionStats {
             }
             count += 1
         }
-        result.append(.init(group: .above(previousBoundary!), count: count))
+        if let previousBoundary = previousBoundary {
+            result.append(.init(group: .above(previousBoundary), count: count))
+        } else if count > 0 {
+            result.append(.init(group: .init(lower: previousBoundary, upper: boundaries.first ?? sorted.last ?? 0), count: count))
+        }
+        
         return result
     }
     
