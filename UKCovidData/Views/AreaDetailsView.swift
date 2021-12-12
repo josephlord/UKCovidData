@@ -42,7 +42,7 @@ struct AreaDetailsView : View {
                 Image(systemName: showAges ? "chevron.up" : "chevron.down")
             }
             if showAges {
-                AgeOptionsView(ageOptions: ageOptions, showButtons: false)
+                AgeOptionsView(ageOptions: ageOptions, showButtons: true)
             }
             Spacer(minLength: 8)
             ScrollView {
